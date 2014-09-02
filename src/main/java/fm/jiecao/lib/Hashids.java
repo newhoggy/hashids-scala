@@ -90,6 +90,9 @@ public class Hashids {
       }
     }
 
+    System.out.println(this.seps);
+    System.out.println(this.alphabet);
+
     this.alphabet = this.consistentShuffle(this.alphabet, this.salt);
     // use double to round up
     int guardCount = (int)Math.ceil((double)this.alphabet.length() / this.guardDiv);
@@ -101,6 +104,11 @@ public class Hashids {
       this.guards = this.alphabet.substring(0, guardCount);
       this.alphabet = this.alphabet.substring(guardCount);
     }
+
+    System.out.println(this.seps);
+    System.out.println(this.alphabet);
+    System.out.println(this.guards);
+
   }
 
   /**
@@ -113,6 +121,10 @@ public class Hashids {
     String retval = "";
     if(numbers.length == 0) {
       return retval;
+    }
+
+    for(int j = 0; j < numbers.length; j++){
+      System.out.println("+++" + numbers[j]);
     }
 
     return this.encode(numbers);
@@ -137,6 +149,11 @@ public class Hashids {
     int numberHashInt = 0;
     for(int i = 0; i < numbers.length; i++){
       numberHashInt += (numbers[i] % (i+100));
+      System.out.println("------>>>>");
+      System.out.println(i);
+      System.out.println(numbers[i]);
+      System.out.println(numberHashInt);
+      System.out.println("<<<<------");
     }
     String alphabet = this.alphabet;
     char ret = alphabet.toCharArray()[numberHashInt % alphabet.length()];
@@ -146,21 +163,41 @@ public class Hashids {
     String buffer, ret_str = ret + "";
     char guard;
 
+    System.out.println(">>" + numberHashInt);
+    System.out.println(">>" + alphabet);
+    System.out.println(">>" + alphabet.length());
+    System.out.println(">>" + lottery);
+
     for(int i = 0; i < numbers.length; i++){
       num = numbers[i];
       buffer = lottery + this.salt + alphabet;
 
+    System.out.println("==>" + lottery);
+    System.out.println("==>" + this.salt);
+    System.out.println("==>" + alphabet);
+    System.out.println("==>" + buffer);
+
       alphabet = this.consistentShuffle(alphabet, buffer.substring(0, alphabet.length()));
       String last = this.hash(num, alphabet);
 
+
       ret_str += last;
+
+    System.out.println("==>" + alphabet);
+    System.out.println("==>" + last);
+    System.out.println("==>" + ret_str);
 
       if(i + 1 < numbers.length){
         num %= ((int)last.toCharArray()[0] + i);
         sepsIndex = (int)(num % this.seps.length());
         ret_str += this.seps.toCharArray()[sepsIndex];
       }
+
+    System.out.println("==>" + alphabet);
+    System.out.println("==>" + ret_str);
+    System.out.println("==>");
     }
+
 
     if(ret_str.length() < this.minHashLength){
       guardIndex = (numberHashInt + (int)(ret_str.toCharArray()[0])) % this.guards.length();
@@ -177,6 +214,11 @@ public class Hashids {
     }
 
     int halfLen = alphabet.length() / 2;
+
+    System.out.println("-->" + halfLen);
+    System.out.println("-->" + alphabet);
+    System.out.println("-->" + ret_str);
+
     while(ret_str.length() < this.minHashLength){
       alphabet = this.consistentShuffle(alphabet, alphabet);
       ret_str = alphabet.substring(halfLen) + ret_str + alphabet.substring(0, halfLen);
