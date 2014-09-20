@@ -2,85 +2,130 @@ package org.hashids
 
 object Hashids {
   val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-}
 
-class Hashids(
-    var salt: String = "",
-    var minHashLength: Int = 0,
-    var alphabet: String = Hashids.defaultAlphabet) {
-  var seps: String = "cfhistuCFHISTU"
-  var sepDiv: Double = 3.5
-  var guardDiv: Int = 12
-  var minAlphabetLength: Int = 16
-  var guards: String = ""
+  def apply(
+      salt: String = "",
+      inMinHashLength: Int = 0,
+      inAlphabet: String = Hashids.defaultAlphabet): Hashids = {
+    var seps: String = "cfhistuCFHISTU"
+    var sepDiv: Double = 3.5
+    var guardDiv: Int = 12
+    val minAlphabetLength: Int = 16
+    var guards: String = ""
 
-  minHashLength = minHashLength max 0
+    val minHashLength = inMinHashLength max 0
 
-  alphabet = {
-    var uniqueAlphabet: String = ""
+    var alphabet = {
+      var uniqueAlphabet: String = ""
 
-    for (i <- 0 until alphabet.length) {
-      if (!uniqueAlphabet.contains("" + alphabet(i))) {
-        uniqueAlphabet += "" + alphabet(i)
+      for (i <- 0 until inAlphabet.length) {
+        if (!uniqueAlphabet.contains("" + inAlphabet(i))) {
+          uniqueAlphabet += "" + inAlphabet(i)
+        }
+      }
+
+      uniqueAlphabet
+    }
+
+    if (alphabet.length < minAlphabetLength) {
+      throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
+    }
+
+    if (alphabet.contains(" ")) {
+      throw new IllegalArgumentException("alphabet cannot contains spaces")
+    }
+
+    // seps should contain only characters present in alphabet
+    // alphabet should not contains seps
+    for (i <- 0 until seps.length) {
+      val j = alphabet.indexOf(seps(i))
+
+      if (j == -1) {
+        seps = seps.substring(0, i) + " " + seps.substring(i + 1)
+      } else {
+        alphabet = alphabet.substring(0, j) + " " + alphabet.substring(j + 1)
       }
     }
 
-    uniqueAlphabet
-  }
+    alphabet = alphabet.replaceAll("\\s+", "")
+    seps = seps.replaceAll("\\s+", "")
+    seps = consistentShuffle(seps, salt)
 
-  if (alphabet.length < this.minAlphabetLength) {
-    throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
-  }
+    if (seps == "" || (alphabet.length / seps.length) > sepDiv) {
+      var seps_len: Int = (alphabet.length / sepDiv).ceil.toInt
 
-  if (alphabet.contains(" ")) {
-    throw new IllegalArgumentException("alphabet cannot contains spaces")
-  }
+      if (seps_len == 1) {
+        seps_len += 1
+      }
 
-  // seps should contain only characters present in alphabet
-  // alphabet should not contains seps
-  for (i <- 0 until seps.length) {
-    val j = alphabet.indexOf(seps(i))
+      if (seps_len > seps.length) {
+        val diff = seps_len - seps.length
+        seps += alphabet.substring(0, diff)
+        alphabet = alphabet.substring(diff)
+      } else {
+        seps = seps.substring(0, seps_len)
+      }
+    }
 
-    if (j == -1) {
-      seps = seps.substring(0, i) + " " + seps.substring(i + 1)
+    alphabet = consistentShuffle(alphabet, salt)
+
+    // use double to round up
+    val guardCount = (alphabet.length.toDouble / guardDiv).ceil.toInt
+
+    if (alphabet.length < 3) {
+      guards = seps.substring(0, guardCount)
+      seps = seps.substring(guardCount)
     } else {
-      alphabet = alphabet.substring(0, j) + " " + alphabet.substring(j + 1)
-    }
-  }
-
-  this.alphabet = this.alphabet.replaceAll("\\s+", "")
-  this.seps = this.seps.replaceAll("\\s+", "")
-  this.seps = this.consistentShuffle(this.seps, this.salt)
-
-  if (this.seps == "" || (this.alphabet.length / this.seps.length) > this.sepDiv) {
-    var seps_len: Int = (this.alphabet.length / this.sepDiv).ceil.toInt
-
-    if (seps_len == 1) {
-      seps_len += 1
+      guards = alphabet.substring(0, guardCount)
+      alphabet = alphabet.substring(guardCount)
     }
 
-    if (seps_len > this.seps.length) {
-      val diff = seps_len - this.seps.length
-      this.seps += this.alphabet.substring(0, diff)
-      this.alphabet = this.alphabet.substring(diff)
-    } else {
-      this.seps = this.seps.substring(0, seps_len)
+    new Hashids(
+        salt,
+        minHashLength,
+        alphabet,
+        seps,
+        guards)
+  }
+
+  /* Private methods */
+  private def consistentShuffle(inAlphabet: String, salt: String): String = {
+    if (salt.length <= 0) {
+      return inAlphabet
     }
+
+    var alphabet = inAlphabet
+    val arr = salt.toCharArray()
+    var asc_val = 0
+    var j = 0
+    var tmp = '\0'
+
+    var v = 0
+    var p = 0
+
+    for (i <- (alphabet.length - 1) until 0 by -1) {
+      v %= salt.length
+      asc_val = arr(v).toInt
+      p += asc_val
+      j = (asc_val + v + p) % i
+
+      tmp = alphabet.charAt(j)
+      alphabet = alphabet.substring(0, j) + alphabet.charAt(i) + alphabet.substring(j + 1)
+      alphabet = alphabet.substring(0, i) + tmp + alphabet.substring(i + 1)
+
+      v += 1
+    }
+
+    return alphabet
   }
+}
 
-  this.alphabet = this.consistentShuffle(this.alphabet, this.salt)
-
-  // use double to round up
-  val guardCount = (this.alphabet.length.toDouble / this.guardDiv).ceil.toInt
-
-  if (this.alphabet.length < 3) {
-    this.guards = this.seps.substring(0, guardCount)
-    this.seps = this.seps.substring(guardCount)
-  } else {
-    this.guards = this.alphabet.substring(0, guardCount)
-    this.alphabet = this.alphabet.substring(guardCount)
-  }
-
+class Hashids private (
+    salt: String,
+    minHashLength: Int,
+    alphabet: String,
+    seps: String,
+    guards: String) {
   /**
    * Encrypt numbers to string
    *
@@ -131,7 +176,7 @@ class Hashids(
       num = numbers(i)
       buffer = lottery + this.salt + alphabet
 
-      alphabet = this.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
+      alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
       val last = this.hash(num, alphabet)
 
       ret_str += last
@@ -159,7 +204,7 @@ class Hashids(
 
     val halfLen = alphabet.length / 2
     while (ret_str.length < this.minHashLength) {
-      alphabet = this.consistentShuffle(alphabet, alphabet)
+      alphabet = Hashids.consistentShuffle(alphabet, alphabet)
       ret_str = alphabet.substring(halfLen) + ret_str + alphabet.substring(0, halfLen)
       val excess = ret_str.length - this.minHashLength
       if (excess > 0) {
@@ -197,7 +242,7 @@ class Hashids(
     for (aHashArray <- hashArray) {
       subHash = aHashArray
       buffer = lottery + this.salt + alphabet
-      alphabet = this.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
+      alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
       ret.add(this.unhash(subHash, alphabet))
     }
 
@@ -209,37 +254,6 @@ class Hashids(
     }
 
     return arr
-  }
-
-  /* Private methods */
-  private def consistentShuffle(inAlphabet: String, salt: String): String = {
-    if (salt.length <= 0) {
-      return inAlphabet
-    }
-
-    var alphabet = inAlphabet
-    val arr = salt.toCharArray()
-    var asc_val = 0
-    var j = 0
-    var tmp = '\0'
-
-    var v = 0
-    var p = 0
-
-    for (i <- (alphabet.length - 1) until 0 by -1) {
-      v %= salt.length
-      asc_val = arr(v).toInt
-      p += asc_val
-      j = (asc_val + v + p) % i
-
-      tmp = alphabet.charAt(j)
-      alphabet = alphabet.substring(0, j) + alphabet.charAt(i) + alphabet.substring(j + 1)
-      alphabet = alphabet.substring(0, i) + tmp + alphabet.substring(i + 1)
-
-      v += 1
-    }
-
-    return alphabet
   }
 
   private def hash(inInput: Long, alphabet: String): String = {
