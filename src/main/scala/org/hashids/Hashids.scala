@@ -216,13 +216,13 @@ class Hashids private (
     }
 
     if (ret_str.length < this.minHashLength) {
-      guardIndex = (numberHashInt + (ret_str.toCharArray()(0)).toInt) % this.guards.length
+      guardIndex = (numberHashInt + ret_str.toCharArray()(0).toInt) % this.guards.length
       guard = this.guards.toCharArray()(guardIndex)
 
       ret_str = guard + ret_str
 
       if (ret_str.length < this.minHashLength) {
-        guardIndex = (numberHashInt + (ret_str.toCharArray()(2)).toInt) % this.guards.length
+        guardIndex = (numberHashInt + ret_str.toCharArray()(2).toInt) % this.guards.length
         guard = this.guards.toCharArray()(guardIndex)
 
         ret_str += guard
