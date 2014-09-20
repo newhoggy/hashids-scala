@@ -300,13 +300,13 @@ class Hashids(
   }
 
   private def unhash(input: String, alphabet: String): Long = {
-    var number = 0
-    var pos = 0
+    var number = 0L
+    var pos = 0L
     val input_arr = input.toCharArray()
 
     for (i <- 0 until input.length) {
       pos = alphabet.indexOf(input_arr(i))
-      number += (pos * scala.math.pow(alphabet.length(), input.length() - i - 1)).toInt
+      number += (pos * scala.math.pow(alphabet.length(), input.length() - i - 1)).toLong
     }
 
     return number;
@@ -330,13 +330,5 @@ class Hashids(
    */
   def getVersion(): String = {
     return "1.0.0"
-  }
-}
-
-object Moo {
-  def main(args: Array[String]): Unit = {
-    val hashids = new Hashids()
-    val result = hashids.encode(12345)
-    println(result)
   }
 }
