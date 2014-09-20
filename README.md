@@ -1,3 +1,6 @@
+# Hashids.scala
+
+<!--
 # Hashids.java ![aaa](http://img.shields.io/badge/hashids--java-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/jiecao-fm/hashids-java.png?label=ready&title=Ready)](https://waffle.io/jiecao-fm/hashids-java) [![Build Status](https://drone.io/github.com/jiecao-fm/hashids-java/status.png)](https://drone.io/github.com/jiecao-fm/hashids-java/latest)
 
 A small Java class to generate YouTube-like hashes from one or many numbers.
@@ -192,3 +195,4 @@ Follow me [@fanweixiao](https://twitter.com/fanweixiao) or [@IvanAkimov](http://
 ## License
 
 MIT License. See the `LICENSE` file.
+-->
