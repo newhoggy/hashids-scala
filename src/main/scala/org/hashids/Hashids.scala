@@ -8,8 +8,8 @@ object Hashids {
       inMinHashLength: Int = 0,
       inAlphabet: String = Hashids.defaultAlphabet): Hashids = {
     var seps: String = "cfhistuCFHISTU"
-    var sepDiv: Double = 3.5
-    var guardDiv: Int = 12
+    val sepDiv: Double = 3.5
+    val guardDiv: Int = 12
     val minAlphabetLength: Int = 16
     var guards: String = ""
 
@@ -96,20 +96,16 @@ object Hashids {
 
     var alphabet = inAlphabet
     val arr = salt.toCharArray()
-    var asc_val = 0
-    var j = 0
-    var tmp = '\0'
-
     var v = 0
     var p = 0
 
     for (i <- (alphabet.length - 1) until 0 by -1) {
       v %= salt.length
-      asc_val = arr(v).toInt
+      val asc_val = arr(v).toInt
       p += asc_val
-      j = (asc_val + v + p) % i
+      val j = (asc_val + v + p) % i
 
-      tmp = alphabet.charAt(j)
+      val tmp = alphabet.charAt(j)
       alphabet = alphabet.substring(0, j) + alphabet.charAt(i) + alphabet.substring(j + 1)
       alphabet = alphabet.substring(0, i) + tmp + alphabet.substring(i + 1)
 
@@ -134,12 +130,12 @@ object Hashids {
   }
 
   private def unhash(input: String, alphabet: String): Long = {
-    var number = 0L
-    var pos = 0L
     val input_arr = input.toCharArray()
 
+    var number = 0L
+
     for (i <- 0 until input.length) {
-      pos = alphabet.indexOf(input_arr(i))
+      val pos = alphabet.indexOf(input_arr(i))
       number += (pos * scala.math.pow(alphabet.length, input.length - i - 1)).toLong
     }
 
@@ -160,10 +156,8 @@ class Hashids private (
    * @return the encrypt string
    */
   def encode(numbers: Long*): String = {
-    var retval = ""
-
     if (numbers.length == 0) {
-      return retval
+      return ""
     }
 
     return this._encode(numbers: _*)
@@ -192,16 +186,11 @@ class Hashids private (
     var alphabet = this.alphabet
     val ret = alphabet.toCharArray()(numberHashInt % alphabet.length)
     val lottery = ret
-    var num = 0L
-    var sepsIndex = 0
-    var guardIndex = 0
-    var buffer = ""
     var ret_str = ret + ""
-    var guard: Char = '\0'
 
     for (i <- 0 until numbers.length) {
-      num = numbers(i)
-      buffer = lottery + this.salt + alphabet
+      var num = numbers(i)
+      val buffer = lottery + this.salt + alphabet
 
       alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
       val last = Hashids.hash(num, alphabet)
@@ -210,14 +199,14 @@ class Hashids private (
 
       if (i + 1 < numbers.length) {
         num %= (last.toCharArray()(0) + i).toInt
-        sepsIndex = (num % this.seps.length).toInt
+        val sepsIndex = (num % this.seps.length).toInt
         ret_str += this.seps.toCharArray()(sepsIndex)
       }
     }
 
     if (ret_str.length < this.minHashLength) {
-      guardIndex = (numberHashInt + ret_str.toCharArray()(0).toInt) % this.guards.length
-      guard = this.guards.toCharArray()(guardIndex)
+      var guardIndex = (numberHashInt + ret_str.toCharArray()(0).toInt) % this.guards.length
+      var guard = this.guards.toCharArray()(guardIndex)
 
       ret_str = guard + ret_str
 
@@ -263,12 +252,9 @@ class Hashids private (
     hashBreakdown = hashBreakdown.replaceAll("[" + this.seps + "]", " ")
     hashArray = hashBreakdown.split(" ")
 
-    var subHash = ""
-    var buffer = ""
-
     for (aHashArray <- hashArray) {
-      subHash = aHashArray
-      buffer = lottery + this.salt + alphabet
+      val subHash = aHashArray
+      val buffer = lottery + this.salt + alphabet
       alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
       ret.add(Hashids.unhash(subHash, alphabet))
     }
