@@ -1,13 +1,13 @@
 package org.hashids
 
 object Hashids {
-  val DEFAULT_ALPHABET: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+  val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 }
 
 class Hashids(
     var salt: String = "",
     var minHashLength: Int = 0,
-    var alphabet: String = Hashids.DEFAULT_ALPHABET) {
+    var alphabet: String = Hashids.defaultAlphabet) {
   var seps: String = "cfhistuCFHISTU"
   var sepDiv: Double = 3.5
   var guardDiv: Int = 12
@@ -310,17 +310,6 @@ class Hashids(
     }
 
     return number;
-  }
-
-  def checkedCast(value: Long): Int = {
-    var result = value.toInt
-
-    if (result != value) {
-      // don't use checkArgument here, to avoid boxing
-      throw new IllegalArgumentException(s"Out of range: $value")
-    }
-
-    return result
   }
 
   /**
