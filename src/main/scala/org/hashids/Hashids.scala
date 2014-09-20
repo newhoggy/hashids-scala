@@ -118,6 +118,33 @@ object Hashids {
 
     return alphabet
   }
+
+  private def hash(inInput: Long, alphabet: String): String = {
+    var hash = ""
+    val alphabetLen = alphabet.length
+    val arr = alphabet.toCharArray()
+    var input = inInput
+
+    do {
+      hash = arr((input % alphabetLen).toInt) + hash
+      input /= alphabetLen
+    } while (input > 0)
+
+    return hash
+  }
+
+  private def unhash(input: String, alphabet: String): Long = {
+    var number = 0L
+    var pos = 0L
+    val input_arr = input.toCharArray()
+
+    for (i <- 0 until input.length) {
+      pos = alphabet.indexOf(input_arr(i))
+      number += (pos * scala.math.pow(alphabet.length, input.length - i - 1)).toLong
+    }
+
+    return number
+  }
 }
 
 class Hashids private (
@@ -177,7 +204,7 @@ class Hashids private (
       buffer = lottery + this.salt + alphabet
 
       alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
-      val last = this.hash(num, alphabet)
+      val last = Hashids.hash(num, alphabet)
 
       ret_str += last
 
@@ -243,7 +270,7 @@ class Hashids private (
       subHash = aHashArray
       buffer = lottery + this.salt + alphabet
       alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
-      ret.add(this.unhash(subHash, alphabet))
+      ret.add(Hashids.unhash(subHash, alphabet))
     }
 
     // Transform from List<Long> to long[]
@@ -254,33 +281,6 @@ class Hashids private (
     }
 
     return arr
-  }
-
-  private def hash(inInput: Long, alphabet: String): String = {
-    var hash = ""
-    val alphabetLen = alphabet.length
-    val arr = alphabet.toCharArray()
-    var input = inInput
-
-    do {
-      hash = arr((input % alphabetLen).toInt) + hash
-      input /= alphabetLen
-    } while (input > 0)
-
-    return hash
-  }
-
-  private def unhash(input: String, alphabet: String): Long = {
-    var number = 0L
-    var pos = 0L
-    val input_arr = input.toCharArray()
-
-    for (i <- 0 until input.length) {
-      pos = alphabet.indexOf(input_arr(i))
-      number += (pos * scala.math.pow(alphabet.length, input.length - i - 1)).toLong
-    }
-
-    return number
   }
 
   /**
