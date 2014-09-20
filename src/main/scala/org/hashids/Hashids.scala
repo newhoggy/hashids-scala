@@ -110,49 +110,6 @@ class Hashids(
     return this._decode(hash, this.alphabet)
   }
 
-  /**
-   * Encrypt hexa to string
-   *
-   * @param hexa the hexa to encrypt
-   * @return the encrypt string
-   */
-  def encodeHex(hexa: String): String = {
-      if (!hexa.matches("^[0-9a-fA-F]+$"))
-        return ""
-
-      val matched = new java.util.ArrayList[Long]
-      val matcher = java.util.regex.Pattern.compile("[\\w\\W]{1,12}").matcher(hexa);
-
-      while (matcher.find())
-          matched.add(java.lang.Long.parseLong("1" + matcher.group(), 16))
-
-      // conversion
-      val result = new Array[Long](matched.size)
-
-      for (i <- 0 until matched.size) {
-        result(i) = matched.get(i)
-      }
-
-      return this._encode(result: _*)
-  }
-
-  /**
-   * Decrypt string to numbers
-   *
-   * @param hash the encrypt string
-   * @return decryped numbers
-   */
-  def decodeHex(hash: String): String = {
-    var result = ""
-    val numbers = this.decode(hash)
-
-    for (number <- numbers) {
-      result += java.lang.Long.toHexString(number).substring(1)
-    }
-
-    return result;
-  }
-
   private def _encode(numbers: Long*): String = {
     var numberHashInt = 0
 
