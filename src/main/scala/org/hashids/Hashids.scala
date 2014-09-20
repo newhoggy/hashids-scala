@@ -136,20 +136,20 @@ class Hashids(
 
       ret_str += last;
 
-      if(i + 1 < numbers.length){
+      if (i + 1 < numbers.length) {
         num %= (last.toCharArray()(0) + i).toInt
         sepsIndex = (num % this.seps.length()).toInt
         ret_str += this.seps.toCharArray()(sepsIndex)
       }
     }
 
-    if(ret_str.length() < this.minHashLength){
+    if (ret_str.length() < this.minHashLength) {
       guardIndex = (numberHashInt + (ret_str.toCharArray()(0)).toInt) % this.guards.length();
       guard = this.guards.toCharArray()(guardIndex)
 
       ret_str = guard + ret_str;
 
-      if(ret_str.length() < this.minHashLength){
+      if (ret_str.length() < this.minHashLength) {
         guardIndex = (numberHashInt + (ret_str.toCharArray()(2)).toInt) % this.guards.length();
         guard = this.guards.toCharArray()(guardIndex)
 
@@ -158,7 +158,7 @@ class Hashids(
     }
 
     val halfLen = alphabet.length() / 2;
-    while(ret_str.length() < this.minHashLength){
+    while (ret_str.length() < this.minHashLength) {
       alphabet = this.consistentShuffle(alphabet, alphabet);
       ret_str = alphabet.substring(halfLen) + ret_str + alphabet.substring(0, halfLen);
       val excess = ret_str.length() - this.minHashLength;
@@ -180,7 +180,7 @@ class Hashids(
     var hashBreakdown = hash.replaceAll(regexp, " ")
     var hashArray = hashBreakdown.split(" ")
 
-    if(hashArray.length == 3 || hashArray.length == 2){
+    if (hashArray.length == 3 || hashArray.length == 2) {
       i = 1;
     }
 
@@ -274,7 +274,5 @@ class Hashids(
    *
    * @return version
    */
-  def getVersion(): String = {
-    return "1.0.0"
-  }
+  def version: String = "1.0.0"
 }
