@@ -59,7 +59,7 @@ val numbers = "NkK9".fromHashid
 
 `numbers` is now going to be:
 
-	List(12345)
+	List(12345L)
 
 #### Decrypting with different salt
 
@@ -97,7 +97,7 @@ val numbers = "aBMswoO2UB3Sj".fromHashid
 
 `numbers` is now going to be:
 
-	List(683, 94108, 123, 5)
+	List(683L, 94108L, 123L, 5L)
 
 #### Encrypting and specifying minimum hash length
 
@@ -123,7 +123,7 @@ val numbers = "gB0NV05e".fromHashid
 
 `numbers` is now going to be:
 
-	List(1)
+	List(1L)
 
 #### Specifying custom hash alphabet
 
