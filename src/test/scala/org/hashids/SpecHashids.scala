@@ -1,6 +1,7 @@
 package org.hashids
 
 import org.specs2.mutable._
+import org.scalacheck._
 
 class SpecHashids extends Specification {
   "One number should encode then decode" >> {
