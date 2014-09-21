@@ -45,7 +45,7 @@ val hash = 12345L.toHashid
 
 `hash` is now going to be:
 
-	NkK9
+	"NkK9"
 
 #### Decrypting
 
@@ -154,7 +154,7 @@ val hash = List(5L, 5L, 5L, 5L).toHashid
 
 You don't see any repeating patterns that might show there's 4 identical numbers in the hash:
 
-	1Wc8cwcE
+	"1Wc8cwcE"
 
 Same with incremented numbers:
 
@@ -166,7 +166,7 @@ val hash = List(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
 
 `hash` will be :
 
-	kRHnurhptKcjIDTWC3sx
+	"kRHnurhptKcjIDTWC3sx"
 
 ### Incrementing number hashes:
 
