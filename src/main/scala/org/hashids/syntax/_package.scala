@@ -8,4 +8,8 @@ package object syntax {
   implicit class RichListLongForHashids(val self: List[Long]) extends AnyVal {
     def toHashid(implicit hashids: Hashids): String = hashids.encode(self: _*)
   }
+
+  implicit class RichLongForHashids(val self: Long) extends AnyVal {
+    def toHashid(implicit hashids: Hashids): String = hashids.encode(self)
+  }
 }
