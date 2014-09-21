@@ -1,6 +1,6 @@
 package org.hashids
 
-import org.hashids.HashidsSyntax._
+import org.hashids.syntax._
 import org.scalacheck._
 import org.specs2._
 
