@@ -1,11 +1,8 @@
-# Hashids.scala
+# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/jiecao-fm/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/jiecao-fm/hashids-scala) [![Build Status](https://drone.io/github.com/jiecao-fm/hashids-scala/status.png)](https://drone.io/github.com/jiecao-fm/hashids-scala/latest)
 
-<!--
-# Hashids.java ![aaa](http://img.shields.io/badge/hashids--java-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/jiecao-fm/hashids-java.png?label=ready&title=Ready)](https://waffle.io/jiecao-fm/hashids-java) [![Build Status](https://drone.io/github.com/jiecao-fm/hashids-java/status.png)](https://drone.io/github.com/jiecao-fm/hashids-java/latest)
+A small Scala library to generate YouTube-like hashes from one or many numbers.
 
-A small Java class to generate YouTube-like hashes from one or many numbers.
-
-Ported from javascript [hashids.js](https://github.com/ivanakimov/hashids.js) by [Ivan Akimov](https://github.com/ivanakimov)
+Ported from Java [hashids-java](https://github.com/jiecao-fm/hashids-java) by [John Ky](https://github.com/newhoggy)
 
 ## What is it?
 
@@ -29,18 +26,19 @@ All (long) integers need to be greater than or equal to zero.
 
 #### Import the package
 
-```java
-import fm.jiecao.lib;
+```scala
+import org.hashids._
+import org.hashids.syntax._
 ```
 
 #### Encrypting one number
 
-You can pass a unique salt value so your hashes differ from everyone else's. I use "this is my salt" as an example.
+You can pass a unique salt value so your hashes differ from everyone else's.  "this is my salt" is used as an example.
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-String hash = hashids.encrypt(12345L);
+implicit val hashids = Hashids("this is my salt")
+val hash = 12345L.toHashid
 ```
 
 `hash` is now going to be:
@@ -51,93 +49,93 @@ String hash = hashids.encrypt(12345L);
 
 Notice during decryption, same salt value is used:
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-long[] numbers = hashids.decrypt("NkK9");
+implicit val hashids = Hashids("this is my salt")
+val numbers = "NkK9".fromHashid
 ```
 
 `numbers` is now going to be:
 
-	[ 12345 ]
+	List(12345)
 
 #### Decrypting with different salt
 
 Decryption will not work if salt is changed:
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my pepper");
-long[] numbers = hashids.decrypt("NkK9");
+implicit val hashids = Hashids("this is my pepper")
+val numbers = "NkK9".fromHashid
 ```
 
 `numbers` is now going to be:
 
-	[]
+	List() // WARNING: currently not working!
 
 #### Encrypting several numbers
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-String hash = hashids.encrypt(683L, 94108L, 123L, 5L);
+implicit val hashids = Hashids("this is my salt")
+val hash = List(683L, 94108L, 123L, 5L).toHashid
 ```
 
 `hash` is now going to be:
 
-	aBMswoO2UB3Sj
+	"aBMswoO2UB3Sj"
 
 #### Decrypting is done the same way
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-long[] numbers = hashids.decrypt("aBMswoO2UB3Sj");
+implicit val hashids = Hashids("this is my salt")
+val numbers = "aBMswoO2UB3Sj".fromHashid
 ```
 
 `numbers` is now going to be:
 
-	[ 683, 94108, 123, 5 ]
+	List(683, 94108, 123, 5)
 
 #### Encrypting and specifying minimum hash length
 
 Here we encrypt integer 1, and set the minimum hash length to **8** (by default it's **0** -- meaning hashes will be the shortest possible length).
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt", 8);
-String hash = hashids.encrypt(1L);
+implicit val hashids = Hashids("this is my salt", 8)
+val hash = 1L.toHashid
 ```
 
 `hash` is now going to be:
 
-	gB0NV05e
+	"gB0NV05e"
 
 #### Decrypting
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt", 8);
-long[] numbers = hashids.decrypt("gB0NV05e");
+implicit val hashids = Hashids("this is my salt", 8)
+val numbers = "gB0NV05e".fromHashid
 ```
 
 `numbers` is now going to be:
 
-	[ 1 ]
+	List(1)
 
 #### Specifying custom hash alphabet
 
 Here we set the alphabet to consist of only four letters: "0123456789abcdef"
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt", 0, "0123456789abcdef");
-String hash = hashids.encrypt(1234567L);
+implicit val hashids = Hashids("this is my salt", 0, "0123456789abcdef")
+val hash = 1234567L.toHashid
 ```
 
 `hash` is now going to be:
 
-	b332db5
+	"b332db5"
 
 ## Randomness
 
@@ -146,10 +144,10 @@ Having said that, this algorithm does try to make these hashes unguessable and u
 
 #### Repeating numbers
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-String hash = hashids.encrypt(5L, 5L, 5L, 5L);
+implicit val hashids = Hashids("this is my salt")
+val hash = List(5L, 5L, 5L, 5L).toHashid
 ```
 
 You don't see any repeating patterns that might show there's 4 identical numbers in the hash:
@@ -158,10 +156,10 @@ You don't see any repeating patterns that might show there's 4 identical numbers
 
 Same with incremented numbers:
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-String hash = hashids.encrypt(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
+implicit val hashids = Hashids("this is my salt")
+val hash = List(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
 ```
 
 `hash` will be :
@@ -170,19 +168,19 @@ String hash = hashids.encrypt(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
 
 ### Incrementing number hashes:
 
-```java
+```scala
 
-Hashids hashids = new Hashids("this is my salt");
-String hash1 = hashids.encrypt(1L); /* NV */
-String hash2 = hashids.encrypt(2L); /* 6m */
-String hash3 = hashids.encrypt(3L); /* yD */
-String hash4 = hashids.encrypt(4L); /* 2l */
-String hash5 = hashids.encrypt(5L); /* rD */
+implicit val hashids = Hashids("this is my salt")
+val hash1 = 1L.toHashid /* NV */
+val hash2 = 2L.toHashid /* 6m */
+val hash3 = 3L.toHashid /* yD */
+val hash4 = 4L.toHashid /* 2l */
+val hash5 = 5L.toHashid /* rD */
 ```
 
 ## Bad hashes
 
-I wrote this class with the intent of placing these hashes in visible places - like the URL. If I create a unique hash for each user, it would be unfortunate if the hash ended up accidentally being a bad word. Imagine auto-creating a URL with hash for your user that looks like this - `http://example.com/user/a**hole`
+This library was written with the intent of placing these hashes in visible places - like the URL. If a unique hash is created for each user, it would be unfortunate if the hash ended up accidentally being a bad word. Imagine auto-creating a URL with hash for your user that looks like this - `http://example.com/user/a**hole`
 
 Therefore, this algorithm tries to avoid generating most common English curse words with the default alphabet. This is done by never placing the following letters next to each other:
 
@@ -190,7 +188,7 @@ Therefore, this algorithm tries to avoid generating most common English curse wo
 
 ## Contact
 
-Follow me [@fanweixiao](https://twitter.com/fanweixiao) or [@IvanAkimov](http://twitter.com/ivanakimov)
+Follow me [@newhoggy](https://twitter.com/newhoggy) or [@IvanAkimov](http://twitter.com/ivanakimov)
 
 ## License
 
