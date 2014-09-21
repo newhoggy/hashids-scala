@@ -1,4 +1,4 @@
-# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/jiecao-fm/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/jiecao-fm/hashids-scala) [![Build Status](https://drone.io/github.com/jiecao-fm/hashids-scala/status.png)](https://drone.io/github.com/jiecao-fm/hashids-scala/latest)
+# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/newhoggy/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/newhoggy/hashids-scala) [![Build Status](https://drone.io/github.com/newhoggy/hashids-scala/status.png)](https://drone.io/github.com/newhoggy/hashids-scala/latest)
 
 A small Scala library to generate YouTube-like hashes from one or many numbers.
 
