@@ -7,7 +7,7 @@ import org.specs2._
 case class ZeroOrPosLong(value: Long)
 
 class CheckHashids extends org.specs2.Specification with org.specs2.ScalaCheck {
-  import CheckHashids.arbitraryZeroOrPosLong
+  import CheckHashids._
 
   def is = {
     "List of random zero or positive longs should encode then decode" ! {
@@ -20,14 +20,14 @@ class CheckHashids extends org.specs2.Specification with org.specs2.ScalaCheck {
       end
     }
   }
-
-  implicit class RichListZeroOrPosLong(self: List[ZeroOrPosLong]) {
-    def raw = self.map(_.value)
-  }
 }
 
 object CheckHashids {
   implicit val arbitraryZeroOrPosLong: Arbitrary[ZeroOrPosLong] = Arbitrary {
     Gen.chooseNum(0L, Long.MaxValue, 2L, 75527867232L).map(ZeroOrPosLong(_))
+  }
+
+  implicit class RichListZeroOrPosLong(self: List[ZeroOrPosLong]) {
+    def raw = self.map(_.value)
   }
 }
