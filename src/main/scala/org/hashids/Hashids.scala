@@ -79,12 +79,11 @@ object Hashids {
     }
 
     var alphabet = inAlphabet
-    val arr = salt.toCharArray()
     var p = 0
 
     for (i <- (alphabet.length - 1) until 0 by -1) {
       val v = (alphabet.length - 1 - i) % salt.length
-      val asc_val = arr(v).toInt
+      val asc_val = salt(v).toInt
       p += asc_val
       val j = (asc_val + v + p) % i
 
