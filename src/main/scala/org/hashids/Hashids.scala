@@ -80,11 +80,10 @@ object Hashids {
 
     var alphabet = inAlphabet
     val arr = salt.toCharArray()
-    var v = 0
     var p = 0
 
     for (i <- (alphabet.length - 1) until 0 by -1) {
-      v %= salt.length
+      val v = (alphabet.length - 1 - i) % salt.length
       val asc_val = arr(v).toInt
       p += asc_val
       val j = (asc_val + v + p) % i
@@ -92,8 +91,6 @@ object Hashids {
       val tmp = alphabet(j)
       alphabet = alphabet.take(j) + alphabet(i) + alphabet.drop(j + 1)
       alphabet = alphabet.take(i) + tmp + alphabet.drop(i + 1)
-
-      v += 1
     }
 
     return alphabet
