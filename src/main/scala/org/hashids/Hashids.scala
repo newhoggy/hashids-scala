@@ -40,15 +40,8 @@ object Hashids {
 
     // seps should contain only characters present in alphabet
     // alphabet should not contains seps
-    for (i <- 0 until seps.length) {
-      val j = alphabet.indexOf(seps(i))
-
-      if (j == -1) {
-        seps = seps.take(i) + " " + seps.drop(i + 1)
-      } else {
-        alphabet = alphabet.take(j) + " " + alphabet.drop(j + 1)
-      }
-    }
+    alphabet = alphabet diff seps
+    seps = alphabet intersect seps
 
     alphabet = alphabet.replaceAll("\\s+", "")
     seps = inSeps.replaceAll("\\s+", "")
