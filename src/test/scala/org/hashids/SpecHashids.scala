@@ -37,6 +37,15 @@ class SpecHashids extends Specification {
     res2(0) must_== num_to_hash
   }
 
+  "Characters should not be disallowed in sep just because they happend to have special meaning in regexes" >> {
+    val num_to_hash = 1L
+    val a = Hashids(inSeps = "[asdf")
+    val res = a.encode(num_to_hash)
+    val res2 = a.decode(res)
+    res2.length must_== 1
+    res2(0) must_== num_to_hash
+  }
+
   "Should be random" >> {
     val expected = "1Wc8cwcE"
     val num_to_hash = Array[Long](5L, 5L, 5L, 5L)

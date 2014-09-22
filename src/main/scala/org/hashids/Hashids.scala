@@ -214,8 +214,7 @@ class Hashids private (
     var ret = List.empty[Long]
 
     var i = 0
-    val regexp = "[" + this.guards + "]"
-    var hashBreakdown = hash.replaceAll(regexp, " ")
+    var hashBreakdown = hash.map(c => if (guards.contains(c)) ' ' else c)
     var hashArray = hashBreakdown.split(" ")
 
     if (hashArray.length == 3 || hashArray.length == 2) {
@@ -226,7 +225,7 @@ class Hashids private (
 
     val lottery = hashBreakdown(0)
     hashBreakdown = hashBreakdown.drop(1)
-    hashBreakdown = hashBreakdown.replaceAll("[" + this.seps + "]", " ")
+    hashBreakdown = hashBreakdown.map(c => if (seps.contains(c)) ' ' else c)
     hashArray = hashBreakdown.split(" ")
 
     for (aHashArray <- hashArray) {
