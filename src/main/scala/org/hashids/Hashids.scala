@@ -41,9 +41,9 @@ object Hashids {
       val j = alphabet.indexOf(seps(i))
 
       if (j == -1) {
-        seps = seps.substring(0, i) + " " + seps.substring(i + 1)
+        seps = seps.take(i) + " " + seps.drop(i + 1)
       } else {
-        alphabet = alphabet.substring(0, j) + " " + alphabet.substring(j + 1)
+        alphabet = alphabet.take(j) + " " + alphabet.drop(j + 1)
       }
     }
 
@@ -60,10 +60,10 @@ object Hashids {
 
       if (seps_len > seps.length) {
         val diff = seps_len - seps.length
-        seps += alphabet.substring(0, diff)
-        alphabet = alphabet.substring(diff)
+        seps += alphabet.take(diff)
+        alphabet = alphabet.drop(diff)
       } else {
-        seps = seps.substring(0, seps_len)
+        seps = seps.take(seps_len)
       }
     }
 
@@ -73,11 +73,11 @@ object Hashids {
     val guardCount = (alphabet.length.toDouble / guardDiv).ceil.toInt
 
     if (alphabet.length < 3) {
-      guards = seps.substring(0, guardCount)
-      seps = seps.substring(guardCount)
+      guards = seps.take(guardCount)
+      seps = seps.drop(guardCount)
     } else {
-      guards = alphabet.substring(0, guardCount)
-      alphabet = alphabet.substring(guardCount)
+      guards = alphabet.take(guardCount)
+      alphabet = alphabet.drop(guardCount)
     }
 
     new Hashids(
@@ -106,8 +106,8 @@ object Hashids {
       val j = (asc_val + v + p) % i
 
       val tmp = alphabet.charAt(j)
-      alphabet = alphabet.substring(0, j) + alphabet.charAt(i) + alphabet.substring(j + 1)
-      alphabet = alphabet.substring(0, i) + tmp + alphabet.substring(i + 1)
+      alphabet = alphabet.take(j) + alphabet(i) + alphabet.drop(j + 1)
+      alphabet = alphabet.take(i) + tmp + alphabet.drop(i + 1)
 
       v += 1
     }
@@ -192,7 +192,7 @@ class Hashids private (
       var num = numbers(i)
       val buffer = lottery + this.salt + alphabet
 
-      alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
+      alphabet = Hashids.consistentShuffle(alphabet, buffer.take(alphabet.length))
       val last = Hashids.hash(num, alphabet)
 
       ret_str += last
@@ -221,7 +221,7 @@ class Hashids private (
     val halfLen = alphabet.length / 2
     while (ret_str.length < this.minHashLength) {
       alphabet = Hashids.consistentShuffle(alphabet, alphabet)
-      ret_str = alphabet.substring(halfLen) + ret_str + alphabet.substring(0, halfLen)
+      ret_str = alphabet.drop(halfLen) + ret_str + alphabet.take(halfLen)
       val excess = ret_str.length - this.minHashLength
       if (excess > 0) {
         val start_pos = excess / 2
@@ -248,14 +248,14 @@ class Hashids private (
     hashBreakdown = hashArray(i)
 
     val lottery = hashBreakdown.toCharArray()(0)
-    hashBreakdown = hashBreakdown.substring(1)
+    hashBreakdown = hashBreakdown.drop(1)
     hashBreakdown = hashBreakdown.replaceAll("[" + this.seps + "]", " ")
     hashArray = hashBreakdown.split(" ")
 
     for (aHashArray <- hashArray) {
       val subHash = aHashArray
       val buffer = lottery + this.salt + alphabet
-      alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
+      alphabet = Hashids.consistentShuffle(alphabet, buffer.take(alphabet.length))
       ret ::= Hashids.unhash(subHash, alphabet)
     }
 
