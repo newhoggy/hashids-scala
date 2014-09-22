@@ -6,17 +6,16 @@ object Hashids {
 
   def apply(
       salt: String = "",
-      inMinHashLength: Int = 0,
-      inAlphabet: String = defaultAlphabet,
+      minHashLength: Int = 0,
+      alphabet: String = defaultAlphabet,
       seps: String = defaultSeps): Hashids = {
     val sepDiv: Double = 3.5
     val guardDiv: Int = 12
     val minAlphabetLength: Int = 16
     var guards: String = ""
+    val myMinHashLength = minHashLength max 0
 
-    val minHashLength = inMinHashLength max 0
-
-    var distinctAlphabet = inAlphabet.distinct
+    var distinctAlphabet = alphabet.distinct
 
     if (distinctAlphabet.length < minAlphabetLength) {
       throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
@@ -28,15 +27,15 @@ object Hashids {
 
     // seps should contain only characters present in alphabet
     // alphabet should not contains seps
-    var alphabet = distinctAlphabet diff seps
+    var myAlphabet = distinctAlphabet diff seps
     var mySeps = distinctAlphabet intersect seps
 
-    alphabet = alphabet.replaceAll("\\s+", "")
+    myAlphabet = myAlphabet.replaceAll("\\s+", "")
     mySeps = mySeps.replaceAll("\\s+", "")
     mySeps = consistentShuffle(mySeps, salt)
 
-    if (mySeps == "" || (alphabet.length / mySeps.length) > sepDiv) {
-      var seps_len: Int = (alphabet.length / sepDiv).ceil.toInt
+    if (mySeps == "" || (myAlphabet.length / mySeps.length) > sepDiv) {
+      var seps_len: Int = (myAlphabet.length / sepDiv).ceil.toInt
 
       if (seps_len == 1) {
         seps_len += 1
@@ -44,29 +43,29 @@ object Hashids {
 
       if (seps_len > mySeps.length) {
         val diff = seps_len - mySeps.length
-        mySeps += alphabet.take(diff)
-        alphabet = alphabet.drop(diff)
+        mySeps += myAlphabet.take(diff)
+        myAlphabet = myAlphabet.drop(diff)
       } else {
         mySeps = mySeps.take(seps_len)
       }
     }
 
-    alphabet = consistentShuffle(alphabet, salt)
+    myAlphabet = consistentShuffle(myAlphabet, salt)
 
-    val guardCount = (alphabet.length.toDouble / guardDiv).ceil.toInt
+    val guardCount = (myAlphabet.length.toDouble / guardDiv).ceil.toInt
 
-    if (alphabet.length < 3) {
+    if (myAlphabet.length < 3) {
       guards = mySeps.take(guardCount)
       mySeps = mySeps.drop(guardCount)
     } else {
-      guards = alphabet.take(guardCount)
-      alphabet = alphabet.drop(guardCount)
+      guards = myAlphabet.take(guardCount)
+      myAlphabet = myAlphabet.drop(guardCount)
     }
 
     new Hashids(
         salt,
-        minHashLength,
-        alphabet,
+        myMinHashLength,
+        myAlphabet,
         mySeps,
         guards)
   }
