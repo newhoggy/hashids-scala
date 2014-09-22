@@ -92,15 +92,15 @@ object Hashids {
     return new String(as)
   }
 
-  private def hash(inInput: Long, alphabet: String): String = {
+  private def hash(input: Long, alphabet: String): String = {
     var hash = ""
     val alphabetLen = alphabet.length
-    var input = inInput
+    var myInput = input
 
     do {
-      hash = alphabet((input % alphabetLen).toInt) + hash
-      input /= alphabetLen
-    } while (input > 0)
+      hash = alphabet((myInput % alphabetLen).toInt) + hash
+      myInput /= alphabetLen
+    } while (myInput > 0)
 
     return hash
   }
@@ -206,8 +206,8 @@ class Hashids private (
     return ret_str
   }
 
-  private def _decode(hash: String, inAlphabet: String): Seq[Long] = {
-    var alphabet = inAlphabet
+  private def _decode(hash: String, alphabet: String): Seq[Long] = {
+    var myAlphabet = alphabet
     var ret = List.empty[Long]
 
     var i = 0
@@ -227,9 +227,9 @@ class Hashids private (
 
     for (aHashArray <- hashArray) {
       val subHash = aHashArray
-      val buffer = lottery + this.salt + alphabet
-      alphabet = Hashids.consistentShuffle(alphabet, buffer.take(alphabet.length))
-      ret ::= Hashids.unhash(subHash, alphabet)
+      val buffer = lottery + this.salt + myAlphabet
+      myAlphabet = Hashids.consistentShuffle(myAlphabet, buffer.take(myAlphabet.length))
+      ret ::= Hashids.unhash(subHash, myAlphabet)
     }
 
     val seq = ret.reverse
