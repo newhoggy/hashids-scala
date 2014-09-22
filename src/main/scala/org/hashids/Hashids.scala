@@ -110,12 +110,10 @@ object Hashids {
   }
 
   private def unhash(input: String, alphabet: String): Long = {
-    val input_arr = input.toCharArray()
-
     var number = 0L
 
     for (i <- 0 until input.length) {
-      val pos = alphabet.indexOf(input_arr(i))
+      val pos = alphabet.indexOf(input(i))
       number += (pos * scala.math.pow(alphabet.length, input.length - i - 1)).toLong
     }
 
