@@ -266,7 +266,7 @@ class Hashids private (
       arr(k) = ret.get(k)
     }
 
-    return arr
+    if (encode(arr: _*) == hash) arr else Array[Long]()
   }
 
   /**
