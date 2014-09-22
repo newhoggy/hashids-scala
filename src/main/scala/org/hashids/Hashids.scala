@@ -98,11 +98,10 @@ object Hashids {
   private def hash(inInput: Long, alphabet: String): String = {
     var hash = ""
     val alphabetLen = alphabet.length
-    val arr = alphabet.toCharArray()
     var input = inInput
 
     do {
-      hash = arr((input % alphabetLen).toInt) + hash
+      hash = alphabet((input % alphabetLen).toInt) + hash
       input /= alphabetLen
     } while (input > 0)
 
@@ -162,7 +161,7 @@ class Hashids private (
     }
 
     var alphabet = this.alphabet
-    val ret = alphabet.toCharArray()(numberHashInt % alphabet.length)
+    val ret = alphabet(numberHashInt % alphabet.length)
     val lottery = ret
     var ret_str = ret + ""
 
@@ -176,21 +175,21 @@ class Hashids private (
       ret_str += last
 
       if (i + 1 < numbers.length) {
-        num %= (last.toCharArray()(0) + i).toInt
+        num %= (last(0) + i).toInt
         val sepsIndex = (num % this.seps.length).toInt
-        ret_str += this.seps.toCharArray()(sepsIndex)
+        ret_str += this.seps(sepsIndex)
       }
     }
 
     if (ret_str.length < this.minHashLength) {
-      var guardIndex = (numberHashInt + ret_str.toCharArray()(0).toInt) % this.guards.length
-      var guard = this.guards.toCharArray()(guardIndex)
+      var guardIndex = (numberHashInt + ret_str(0).toInt) % this.guards.length
+      var guard = this.guards(guardIndex)
 
       ret_str = guard + ret_str
 
       if (ret_str.length < this.minHashLength) {
-        guardIndex = (numberHashInt + ret_str.toCharArray()(2).toInt) % this.guards.length
-        guard = this.guards.toCharArray()(guardIndex)
+        guardIndex = (numberHashInt + ret_str(2).toInt) % this.guards.length
+        guard = this.guards(guardIndex)
 
         ret_str += guard
       }
@@ -225,7 +224,7 @@ class Hashids private (
 
     hashBreakdown = hashArray(i)
 
-    val lottery = hashBreakdown.toCharArray()(0)
+    val lottery = hashBreakdown(0)
     hashBreakdown = hashBreakdown.drop(1)
     hashBreakdown = hashBreakdown.replaceAll("[" + this.seps + "]", " ")
     hashArray = hashBreakdown.split(" ")
