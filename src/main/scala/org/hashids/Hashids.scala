@@ -105,7 +105,7 @@ object Hashids {
       p += asc_val
       val j = (asc_val + v + p) % i
 
-      val tmp = alphabet.charAt(j)
+      val tmp = alphabet(j)
       alphabet = alphabet.take(j) + alphabet(i) + alphabet.drop(j + 1)
       alphabet = alphabet.take(i) + tmp + alphabet.drop(i + 1)
 
