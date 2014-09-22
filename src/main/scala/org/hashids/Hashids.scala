@@ -1,5 +1,7 @@
 package org.hashids
 
+import scala.collection.JavaConversions._
+
 object Hashids {
   val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
@@ -259,14 +261,9 @@ class Hashids private (
       ret.add(Hashids.unhash(subHash, alphabet))
     }
 
-    // Transform from List<Long> to long[]
-    val arr = new Array[Long](ret.size)
+    val seq = ret.toSeq
 
-    for (k <- 0 until arr.length) {
-      arr(k) = ret.get(k)
-    }
-
-    if (encode(arr: _*) == hash) arr else Array[Long]()
+    if (encode(seq: _*) == hash) seq else Seq.empty
   }
 
   /**
