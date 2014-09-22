@@ -55,7 +55,6 @@ object Hashids {
 
     alphabet = consistentShuffle(alphabet, salt)
 
-    // use double to round up
     val guardCount = (alphabet.length.toDouble / guardDiv).ceil.toInt
 
     if (alphabet.length < 3) {
@@ -74,7 +73,6 @@ object Hashids {
         guards)
   }
 
-  /* Private methods */
   private def consistentShuffle(inAlphabet: String, salt: String): String = {
     if (salt.length <= 0) {
       return inAlphabet
@@ -136,7 +134,7 @@ class Hashids private (
     seps: String,
     guards: String) {
   /**
-   * Encrypt numbers to string
+   * Encode numbers to string
    *
    * @param numbers the numbers to encrypt
    * @return the encrypt string
@@ -150,7 +148,7 @@ class Hashids private (
   }
 
   /**
-   * Decrypt string to numbers
+   * Decode string to numbers
    *
    * @param hash the encrypt string
    * @return decryped numbers
@@ -250,10 +248,5 @@ class Hashids private (
     if (encode(seq: _*) == hash) seq else Seq.empty
   }
 
-  /**
-   * Get version
-   *
-   * @return version
-   */
   def version: String = "1.0.0"
 }
