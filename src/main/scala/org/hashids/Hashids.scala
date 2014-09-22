@@ -1,7 +1,5 @@
 package org.hashids
 
-import scala.collection.JavaConversions._
-
 object Hashids {
   val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
@@ -236,7 +234,7 @@ class Hashids private (
 
   private def _decode(hash: String, inAlphabet: String): Seq[Long] = {
     var alphabet = inAlphabet
-    val ret = new java.util.ArrayList[Long]()
+    var ret = List.empty[Long]
 
     var i = 0
     val regexp = "[" + this.guards + "]"
@@ -258,10 +256,10 @@ class Hashids private (
       val subHash = aHashArray
       val buffer = lottery + this.salt + alphabet
       alphabet = Hashids.consistentShuffle(alphabet, buffer.substring(0, alphabet.length))
-      ret.add(Hashids.unhash(subHash, alphabet))
+      ret ::= Hashids.unhash(subHash, alphabet)
     }
 
-    val seq = ret.toSeq
+    val seq = ret.reverse
 
     if (encode(seq: _*) == hash) seq else Seq.empty
   }
