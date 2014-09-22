@@ -2,12 +2,13 @@ package org.hashids
 
 object Hashids {
   val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+  val defaultSeps: String = "cfhistuCFHISTU"
 
   def apply(
       salt: String = "",
       inMinHashLength: Int = 0,
-      inAlphabet: String = Hashids.defaultAlphabet): Hashids = {
-    var seps: String = "cfhistuCFHISTU"
+      inAlphabet: String = defaultAlphabet,
+      inSeps: String = defaultSeps): Hashids = {
     val sepDiv: Double = 3.5
     val guardDiv: Int = 12
     val minAlphabetLength: Int = 16
@@ -35,6 +36,8 @@ object Hashids {
       throw new IllegalArgumentException("alphabet cannot contains spaces")
     }
 
+    var seps = inSeps
+
     // seps should contain only characters present in alphabet
     // alphabet should not contains seps
     for (i <- 0 until seps.length) {
@@ -48,7 +51,7 @@ object Hashids {
     }
 
     alphabet = alphabet.replaceAll("\\s+", "")
-    seps = seps.replaceAll("\\s+", "")
+    seps = inSeps.replaceAll("\\s+", "")
     seps = consistentShuffle(seps, salt)
 
     if (seps == "" || (alphabet.length / seps.length) > sepDiv) {
