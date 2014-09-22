@@ -16,25 +16,23 @@ object Hashids {
 
     val minHashLength = inMinHashLength max 0
 
-    var alphabet = inAlphabet.distinct
+    var distinctAlphabet = inAlphabet.distinct
 
-    if (alphabet.length < minAlphabetLength) {
+    if (distinctAlphabet.length < minAlphabetLength) {
       throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
     }
 
-    if (alphabet.contains(" ")) {
+    if (distinctAlphabet.contains(" ")) {
       throw new IllegalArgumentException("alphabet cannot contains spaces")
     }
 
-    var seps = inSeps
-
     // seps should contain only characters present in alphabet
     // alphabet should not contains seps
-    alphabet = alphabet diff seps
-    seps = alphabet intersect seps
+    var alphabet = distinctAlphabet diff inSeps
+    var seps = distinctAlphabet intersect inSeps
 
     alphabet = alphabet.replaceAll("\\s+", "")
-    seps = inSeps.replaceAll("\\s+", "")
+    seps = seps.replaceAll("\\s+", "")
     seps = consistentShuffle(seps, salt)
 
     if (seps == "" || (alphabet.length / seps.length) > sepDiv) {
