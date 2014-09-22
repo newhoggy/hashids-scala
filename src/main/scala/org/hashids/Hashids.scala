@@ -73,26 +73,26 @@ object Hashids {
         guards)
   }
 
-  private def consistentShuffle(inAlphabet: String, salt: String): String = {
+  private def consistentShuffle(alphabet: String, salt: String): String = {
     if (salt.length <= 0) {
-      return inAlphabet
+      return alphabet
     }
 
-    var alphabet = inAlphabet
+    val as = alphabet.toCharArray
     var p = 0
 
-    for (i <- (alphabet.length - 1) until 0 by -1) {
-      val v = (alphabet.length - 1 - i) % salt.length
+    for (i <- (as.length - 1) until 0 by -1) {
+      val v = (as.length - 1 - i) % salt.length
       val asc_val = salt(v).toInt
       p += asc_val
       val j = (asc_val + v + p) % i
 
-      val tmp = alphabet(j)
-      alphabet = alphabet.take(j) + alphabet(i) + alphabet.drop(j + 1)
-      alphabet = alphabet.take(i) + tmp + alphabet.drop(i + 1)
+      val tmp = as(j)
+      as(j) = as(i)
+      as(i) = tmp
     }
 
-    return alphabet
+    return new String(as)
   }
 
   private def hash(inInput: Long, alphabet: String): String = {
