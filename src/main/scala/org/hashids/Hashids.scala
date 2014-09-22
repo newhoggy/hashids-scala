@@ -16,17 +16,7 @@ object Hashids {
 
     val minHashLength = inMinHashLength max 0
 
-    var alphabet = {
-      var uniqueAlphabet: String = ""
-
-      for (i <- 0 until inAlphabet.length) {
-        if (!uniqueAlphabet.contains("" + inAlphabet(i))) {
-          uniqueAlphabet += "" + inAlphabet(i)
-        }
-      }
-
-      uniqueAlphabet
-    }
+    var alphabet = inAlphabet.distinct
 
     if (alphabet.length < minAlphabetLength) {
       throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
