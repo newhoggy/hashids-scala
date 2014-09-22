@@ -39,7 +39,7 @@ class SpecHashids extends Specification {
 
   "Characters should not be disallowed in sep just because they happend to have special meaning in regexes" >> {
     val num_to_hash = 1L
-    val a = Hashids(inSeps = "[asdf")
+    val a = Hashids(seps = "[asdf")
     val res = a.encode(num_to_hash)
     val res2 = a.decode(res)
     res2.length must_== 1

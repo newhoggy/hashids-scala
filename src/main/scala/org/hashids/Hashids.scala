@@ -8,7 +8,7 @@ object Hashids {
       salt: String = "",
       inMinHashLength: Int = 0,
       inAlphabet: String = defaultAlphabet,
-      inSeps: String = defaultSeps): Hashids = {
+      seps: String = defaultSeps): Hashids = {
     val sepDiv: Double = 3.5
     val guardDiv: Int = 12
     val minAlphabetLength: Int = 16
@@ -28,26 +28,26 @@ object Hashids {
 
     // seps should contain only characters present in alphabet
     // alphabet should not contains seps
-    var alphabet = distinctAlphabet diff inSeps
-    var seps = distinctAlphabet intersect inSeps
+    var alphabet = distinctAlphabet diff seps
+    var mySeps = distinctAlphabet intersect seps
 
     alphabet = alphabet.replaceAll("\\s+", "")
-    seps = seps.replaceAll("\\s+", "")
-    seps = consistentShuffle(seps, salt)
+    mySeps = mySeps.replaceAll("\\s+", "")
+    mySeps = consistentShuffle(mySeps, salt)
 
-    if (seps == "" || (alphabet.length / seps.length) > sepDiv) {
+    if (mySeps == "" || (alphabet.length / mySeps.length) > sepDiv) {
       var seps_len: Int = (alphabet.length / sepDiv).ceil.toInt
 
       if (seps_len == 1) {
         seps_len += 1
       }
 
-      if (seps_len > seps.length) {
-        val diff = seps_len - seps.length
-        seps += alphabet.take(diff)
+      if (seps_len > mySeps.length) {
+        val diff = seps_len - mySeps.length
+        mySeps += alphabet.take(diff)
         alphabet = alphabet.drop(diff)
       } else {
-        seps = seps.take(seps_len)
+        mySeps = mySeps.take(seps_len)
       }
     }
 
@@ -56,8 +56,8 @@ object Hashids {
     val guardCount = (alphabet.length.toDouble / guardDiv).ceil.toInt
 
     if (alphabet.length < 3) {
-      guards = seps.take(guardCount)
-      seps = seps.drop(guardCount)
+      guards = mySeps.take(guardCount)
+      mySeps = mySeps.drop(guardCount)
     } else {
       guards = alphabet.take(guardCount)
       alphabet = alphabet.drop(guardCount)
@@ -67,7 +67,7 @@ object Hashids {
         salt,
         minHashLength,
         alphabet,
-        seps,
+        mySeps,
         guards)
   }
 
