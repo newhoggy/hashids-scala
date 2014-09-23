@@ -2,7 +2,7 @@
 
 sbt_launch_update() {
   if [ ! -d sbt-launch ]; then
-    git clone git@github.com:newhoggy/sbt-launch.git
+    git clone https://github.com/newhoggy/sbt-launch.git
   else
     git -C sbt-launch pull
   fi
