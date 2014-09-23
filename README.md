@@ -1,4 +1,4 @@
-# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-0.3.3-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/newhoggy/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/newhoggy/hashids-scala) [![Build Status](https://drone.io/github.com/newhoggy/hashids-scala/status.png)](https://drone.io/github.com/newhoggy/hashids-scala/latest)
+# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-1.0-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/newhoggy/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/newhoggy/hashids-scala) [![Build Status](https://drone.io/github.com/newhoggy/hashids-scala/status.png)](https://drone.io/github.com/newhoggy/hashids-scala/latest)
 
 WARNING: This library is not yet ready for use.
 
