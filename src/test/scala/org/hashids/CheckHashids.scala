@@ -32,7 +32,7 @@ class CheckHashids extends org.specs2.Specification with org.specs2.ScalaCheck {
       end
     }
 
-    "List of random zero or positive longs should encode then decode with min hash length" ! {
+    "List of random zero or positive longs should encode then decode and honour min hash length" ! {
       check { (a: List[ZeroOrPosLong], salt: String, minHashLength: Size) =>
         implicit val hashid = Hashids(salt = salt, minHashLength = minHashLength.size)
 
