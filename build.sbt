@@ -1,6 +1,6 @@
 name := "hashids-scala"
 
-organization := "org.hashids"
+organization := "com.timesprint"
 
 version := "1.0-SNAPSHOT"
 
