@@ -18,7 +18,7 @@ class SpecHashids extends Specification {
   "Several numbers should encode then decode" >> {
     implicit val hashids = Hashids("this is my salt")
     val expected = "aBMswoO2UB3Sj"
-    val data = List[Long](683L, 94108L, 123L, 5L)
+    val data = Seq[Long](683L, 94108L, 123L, 5L)
     val hashed = data.toHashid
     val unhashed = hashed.fromHashid
     hashed must_== expected

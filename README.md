@@ -69,7 +69,7 @@ val numbers = "NkK9".fromHashid
 
 `numbers` is now going to be:
 
-	List(12345L)
+	Seq(12345L)
 
 #### Decrypting with different salt
 
@@ -83,14 +83,14 @@ val numbers = "NkK9".fromHashid
 
 `numbers` is now going to be:
 
-	List() // WARNING: currently not working!
+	Seq()
 
 #### Encrypting several numbers
 
 ```scala
 
 implicit val hashids = Hashids("this is my salt")
-val hash = List(683L, 94108L, 123L, 5L).toHashid
+val hash = Seq(683L, 94108L, 123L, 5L).toHashid
 ```
 
 `hash` is now going to be:
@@ -107,7 +107,7 @@ val numbers = "aBMswoO2UB3Sj".fromHashid
 
 `numbers` is now going to be:
 
-	List(683L, 94108L, 123L, 5L)
+	Seq(683L, 94108L, 123L, 5L)
 
 #### Encrypting and specifying minimum hash length
 
@@ -133,7 +133,7 @@ val numbers = "gB0NV05e".fromHashid
 
 `numbers` is now going to be:
 
-	List(1L)
+	Seq(1L)
 
 #### Specifying custom hash alphabet
 
@@ -159,7 +159,7 @@ Having said that, this algorithm does try to make these hashes unguessable and u
 ```scala
 
 implicit val hashids = Hashids("this is my salt")
-val hash = List(5L, 5L, 5L, 5L).toHashid
+val hash = Seq(5L, 5L, 5L, 5L).toHashid
 ```
 
 You don't see any repeating patterns that might show there's 4 identical numbers in the hash:
@@ -171,7 +171,7 @@ Same with incremented numbers:
 ```scala
 
 implicit val hashids = Hashids("this is my salt")
-val hash = List(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
+val hash = Seq(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
 ```
 
 `hash` will be :
