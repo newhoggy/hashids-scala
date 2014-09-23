@@ -1,95 +1,89 @@
 package org.hashids
 
+import org.hashids.syntax._
 import org.specs2.mutable._
 import org.scalacheck._
 
 class SpecHashids extends Specification {
   "One number should encode then decode" >> {
+    implicit val hashids = Hashids("this is my salt")
     val expected = "NkK9"
-    val num_to_hash = 12345L
-    val a = Hashids("this is my salt")
-    val res = a.encode(num_to_hash)
-    val res2 = a.decode(expected)
-    res must_== expected
-    res2.length must_== 1
-    res2(0) must_== num_to_hash
+    val data = 12345L
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== List(data)
   }
 
   "Several numbers should encode then decode" >> {
+    implicit val hashids = Hashids("this is my salt")
     val expected = "aBMswoO2UB3Sj"
-    val num_to_hash = Array[Long](683L, 94108L, 123L, 5L)
-    val a = Hashids("this is my salt")
-    val res = a.encode(num_to_hash: _*)
-    val res2 = a.decode(expected)
-    res must_== expected
-    res2.length must_== num_to_hash.length
-    res2.toList must_== num_to_hash.toList
+    val data = List[Long](683L, 94108L, 123L, 5L)
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== data
   }
 
   "One number should encode then decode with salt" >> {
+    implicit val hashids = Hashids("this is my salt", 8)
     val expected = "gB0NV05e"
-    val num_to_hash = 1L
-    val a = Hashids("this is my salt", 8)
-    val res = a.encode(num_to_hash)
-    val res2 = a.decode(expected)
-    res must_== expected
-    res2.length must_== 1
-    res2(0) must_== num_to_hash
+    val data = 1L
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== List(data)
   }
 
   "Characters should not be disallowed in sep just because they happend to have special meaning in regexes" >> {
-    val num_to_hash = 1L
-    val a = Hashids(seps = "[asdf")
-    val res = a.encode(num_to_hash)
-    val res2 = a.decode(res)
-    res2.length must_== 1
-    res2(0) must_== num_to_hash
+    implicit val hashids = Hashids(seps = "[asdf")
+    val data = 1L
+    val hashed = data.toHashid
+    val unhashed = hashids.decode(hashed)
+    unhashed must_== List(data)
   }
 
   "Should be random" >> {
+    implicit val hashids = Hashids("this is my salt")
     val expected = "1Wc8cwcE"
-    val num_to_hash = Array[Long](5L, 5L, 5L, 5L)
-    val a = Hashids("this is my salt")
-    val res2 = a.decode(expected)
-    val res = a.encode(num_to_hash: _*)
-    res must_== expected
-    res2.length must_== num_to_hash.length
-    res2.toList must_== num_to_hash.toList
+    val data = List[Long](5L, 5L, 5L, 5L)
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== data
   }
 
   "Hash for sequence of consecutive numbers should appear random" >> {
+    implicit val hashids = Hashids("this is my salt")
     val expected = "kRHnurhptKcjIDTWC3sx"
-    val num_to_hash = List[Long](1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
-    val a = Hashids("this is my salt")
-    val res = a.encode(num_to_hash: _*)
-    val res2 = a.decode(expected)
-    res must_== expected
-    res2.length must_== num_to_hash.length
-    res2.toList must_== num_to_hash.toList
+    val data = List[Long](1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== data
   }
 
   "Sequence of hashes for consecutive numbers should appear random" >> {
-    val a = Hashids("this is my salt")
-    a.encode(1L) must_== "NV"
-    a.encode(2L) must_== "6m"
-    a.encode(3L) must_== "yD"
-    a.encode(4L) must_== "2l"
-    a.encode(5L) must_== "rD"
+    implicit val hashids = Hashids("this is my salt")
+    1L.toHashid must_== "NV"
+    2L.toHashid must_== "6m"
+    3L.toHashid must_== "yD"
+    4L.toHashid must_== "2l"
+    5L.toHashid must_== "rD"
   }
 
   "Max long value should encode" >> {
-    val a = Hashids("this is my salt")
-    a.encode(9876543210123L) must_== "Y8r7W1kNN"
+    implicit val hashids = Hashids("this is my salt")
+    9876543210123L.toHashid must_== "Y8r7W1kNN"
   }
 
   "Special number encode and decode" >> {
+    implicit val hashids = Hashids("this is my salt")
     val expected = "3kK3nNOe"
-    val num_to_hash = 75527867232L
-    val a = Hashids("this is my salt")
-    val res = a.encode(num_to_hash)
-    val res2 = a.decode(expected)
-    res must_== expected
-    res2.length must_== 1
-    res2(0) must_== num_to_hash
+    val data = 75527867232L
+    val hashed = data.toHashid
+    val unhashed = hashed.fromHashid
+    hashed must_== expected
+    unhashed must_== List(data)
   }
 }

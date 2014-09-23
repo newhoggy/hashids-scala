@@ -5,7 +5,11 @@ package object syntax {
     def fromHashid(implicit hashids: Hashids): List[Long] = hashids.decode(self).toList
   }
 
-  implicit class RichListLongForHashids(val self: List[Long]) extends AnyVal {
+  implicit class RichSeqLongForHashids(val self: Seq[Long]) extends AnyVal {
+    def toHashid(implicit hashids: Hashids): String = hashids.encode(self: _*)
+  }
+
+  implicit class RichArrayLongForHashids(val self: Array[Long]) extends AnyVal {
     def toHashid(implicit hashids: Hashids): String = hashids.encode(self: _*)
   }
 
