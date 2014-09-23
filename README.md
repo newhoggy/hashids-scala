@@ -24,6 +24,16 @@ You don't have to store these hashes in the database, but can encrypt + decrypt 
 
 All (long) integers need to be greater than or equal to zero.
 
+## Getting hashids-scala
+
+`hashids-scala` is currently under development.
+
+If you're using SBT, add the following lines to your build file:
+
+	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+	
+    libraryDependencies += "com.timesprint" %% "hashids-scala" % "1.0-SNAPSHOT"
+
 ## Usage
 
 #### Import the package
