@@ -40,7 +40,6 @@ If you're using SBT, add the following lines to your build file:
 
 ```scala
 import org.hashids._
-import org.hashids.syntax._
 ```
 
 #### Encrypting one number
@@ -49,8 +48,8 @@ You can pass a unique salt value so your hashes differ from everyone else's.  "t
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val hash = 12345L.toHashid
+val hashids = Hashids("this is my salt")
+val hash = hashids.encode(12345L)
 ```
 
 `hash` is now going to be:
@@ -63,13 +62,13 @@ Notice during decryption, same salt value is used:
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val numbers = "NkK9".fromHashid
+val hashids = Hashids("this is my salt")
+val numbers = hashids.decode("NkK9")
 ```
 
 `numbers` is now going to be:
 
-	Seq(12345L)
+	List(12345L): Seq[Long]
 
 #### Decrypting with different salt
 
@@ -77,20 +76,20 @@ Decryption will not work if salt is changed:
 
 ```scala
 
-implicit val hashids = Hashids("this is my pepper")
-val numbers = "NkK9".fromHashid
+val hashids = Hashids("this is my pepper")
+val numbers = hashids.decode("NkK9")
 ```
 
 `numbers` is now going to be:
 
-	Seq()
+	List(): Seq[Long]
 
 #### Encrypting several numbers
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val hash = Seq(683L, 94108L, 123L, 5L).toHashid
+val hashids = Hashids("this is my salt")
+val hash = hashids.encode(Seq)
 ```
 
 `hash` is now going to be:
@@ -101,13 +100,13 @@ val hash = Seq(683L, 94108L, 123L, 5L).toHashid
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val numbers = "aBMswoO2UB3Sj".fromHashid
+val hashids = Hashids("this is my salt")
+val numbers = hashids.decode("aBMswoO2UB3Sj")
 ```
 
 `numbers` is now going to be:
 
-	Seq(683L, 94108L, 123L, 5L)
+	List(683L, 94108L, 123L, 5L): Seq[Long]
 
 #### Encrypting and specifying minimum hash length
 
@@ -115,8 +114,8 @@ Here we encrypt integer 1, and set the minimum hash length to **8** (by default 
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt", 8)
-val hash = 1L.toHashid
+val hashids = Hashids("this is my salt", 8)
+val hash = hashids.encode(1L)
 ```
 
 `hash` is now going to be:
@@ -127,13 +126,13 @@ val hash = 1L.toHashid
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt", 8)
-val numbers = "gB0NV05e".fromHashid
+val hashids = Hashids("this is my salt", 8)
+val numbers = hashids.decode("gB0NV05e")
 ```
 
 `numbers` is now going to be:
 
-	Seq(1L)
+	List(1L): Seq[Long]
 
 #### Specifying custom hash alphabet
 
@@ -141,8 +140,8 @@ Here we set the alphabet to consist of only four letters: "0123456789abcdef"
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt", 0, "0123456789abcdef")
-val hash = 1234567L.toHashid
+val hashids = Hashids("this is my salt", 0, "0123456789abcdef")
+val hash = hashids.encode(1234567L)
 ```
 
 `hash` is now going to be:
@@ -158,8 +157,8 @@ Having said that, this algorithm does try to make these hashes unguessable and u
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val hash = Seq(5L, 5L, 5L, 5L).toHashid
+val hashids = Hashids("this is my salt")
+val hash = hashids.encode(5L, 5L, 5L, 5L)
 ```
 
 You don't see any repeating patterns that might show there's 4 identical numbers in the hash:
@@ -170,8 +169,8 @@ Same with incremented numbers:
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val hash = Seq(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
+val hashids = Hashids("this is my salt")
+val hash = hashids.encode(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
 ```
 
 `hash` will be :
@@ -182,13 +181,34 @@ val hash = Seq(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).toHashid
 
 ```scala
 
-implicit val hashids = Hashids("this is my salt")
-val hash1 = 1L.toHashid /* NV */
-val hash2 = 2L.toHashid /* 6m */
-val hash3 = 3L.toHashid /* yD */
-val hash4 = 4L.toHashid /* 2l */
-val hash5 = 5L.toHashid /* rD */
+val hashids = Hashids("this is my salt")
+val hash1 = hashids.encode(1L) /* NV */
+val hash2 = hashids.encode(2L) /* 6m */
+val hash3 = hashids.encode(3L) /* yD */
+val hash4 = hashids.encode(4L) /* 2l */
+val hash5 = hashids.encode(5L) /* rD */
 ```
+
+## Implicit Scala Syntax
+
+`hashids-scala` also supports Scala idiomatic syntax for obtaining the hashids codec object from
+implicit scope.  Import `org.hashids.syntax._` to enable this support.
+
+In the following examples, the `Long` and `Seq[Long]` is pimped to support the
+`encodeHashid` method while `String` is pimped to support the `decodeHashid` method.
+
+```scala
+import org.hashids._
+import org.hashids.syntax._
+
+implicit val hashids = Hashids("this is my salt")
+val hash1 = 12345L.encodeHashid
+val hash2 = List(1L, 2L, 3L).encodeHashid
+val unhashed = "NkK9".decodeHashid
+
+```
+
+In future the library will be updated to implement this syntax using type traits.
 
 ## Bad hashes
 
