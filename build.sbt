@@ -1,3 +1,7 @@
+import SonatypeKeys._
+
+sonatypeSettings
+
 val gitBranch = ("git rev-parse --abbrev-ref HEAD"!!).trim
 
 val gitTag = ("git describe"!!).trim
