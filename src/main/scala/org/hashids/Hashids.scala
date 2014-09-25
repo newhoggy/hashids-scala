@@ -150,6 +150,28 @@ class Hashids private (
     return this._decode(hash, this.alphabet)
   }
 
+  /**
+   * Encode string representation of hexadecimal number to hashid.
+   *
+   * @param hexa the hexa to encrypt
+   * @return the encrypt string
+   */
+  def encodeHex(hexa: String): String = {
+    if (!hexa.matches("^[0-9a-fA-F]+$")) {
+      ""
+    } else {
+      var matched = List.empty[Long]
+      val matcher = java.util.regex.Pattern.compile("[\\w\\W]{1,12}").matcher(hexa)
+
+      while (matcher.find()) {
+        val group = matcher.group()
+        matched = java.lang.Long.parseLong("1" + group, 16) :: matched
+      }
+
+      this._encode(matched.reverse: _*)
+    }
+  }
+
   private def _encode(numbers: Long*): String = {
     var numberHashInt = 0
 
