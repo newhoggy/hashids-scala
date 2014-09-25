@@ -1,0 +1,73 @@
+import sbt._
+import Project.Setting
+import Keys._
+
+object build extends Build {
+  type MySetting = Def.Setting[_]
+
+  def gitHash = sys.process.Process("git rev-parse HEAD").lines_!.head
+
+  lazy val mySettings: Seq[MySetting] = Defaults.defaultSettings ++ Seq[MySetting](
+      organization := "com.timesprint",
+      version := "1.0-SNAPSHOT",
+      name := "hashids-scala",
+      crossScalaVersions := Seq("2.10.4", "2.11.2"),
+      libraryDependencies += "org.specs2" %% "specs2" % "2.4.2" % "test",
+      scalacOptions in Test ++= Seq("-Yrangepos"),
+      resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo),
+      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) =>
+        val nexus = "https://oss.sonatype.org/"
+        if (v.trim.endsWith("SNAPSHOT"))
+          Some("snapshots" at nexus + "content/repositories/snapshots")
+        else
+          Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+      },
+      publishArtifact in Test := false,
+      pomExtra := {
+        <licenses>
+          <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+          </license>
+        </licenses>
+      },
+      pomIncludeRepository := { x => false },
+      pomExtra := {
+        <url>http://timesprint.com/hashids</url>
+        <licenses>
+          <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+          </license>
+        </licenses>
+        <scm>
+          <url>git@github.com:newhoggy/hashids-scala.git</url>
+          <connection>scm:git:git@github.com:newhoggy/hashids-scala.git</connection>
+        </scm>
+        <developers>
+          <developer>
+            <id>newhoggy</id>
+            <name>John Ky</name>
+            <url>http://john-ky.io</url>
+          </developer>
+        </developers>
+      })
+
+  // lazy val root = Project(
+  //     id = "root",
+  //     base = file("."),
+  //     settings = mySettings ++ Seq[MySetting](
+  //         name := "hashids",
+  //         publishLocal := {},
+  //         publish := {}),
+  //     aggregate = Seq(hashids_core))
+
+  lazy val hashids_core = Project(
+      id = "core",
+      base = file("core"),
+      settings = mySettings)
+}
