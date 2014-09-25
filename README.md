@@ -216,6 +216,9 @@ Therefore, this algorithm tries to avoid generating most common English curse wo
 
 	c, C, s, S, f, F, h, H, u, U, i, I, t, T
 
+## Scaladoc
+[Scala API docs](http://newhoggy.github.io/hashids/api/scala_2.11/1.0.0)
+
 ## Contact
 
 Follow me [@newhoggy](https://twitter.com/newhoggy) or [@IvanAkimov](http://twitter.com/ivanakimov)
