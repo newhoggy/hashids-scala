@@ -1,6 +1,4 @@
-# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-1.0-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/newhoggy/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/newhoggy/hashids-scala) [![Build Status](https://drone.io/github.com/newhoggy/hashids-scala/status.png)](https://drone.io/github.com/newhoggy/hashids-scala/latest)
-
-WARNING: This library is not yet ready for use.
+# Hashids.scala ![aaa](http://img.shields.io/badge/hashids--scala-1.0-ff69b4.svg)  [![Stories in Ready](https://badge.waffle.io/newhoggy/hashids-scala.png?label=ready&title=Ready)](https://waffle.io/newhoggy/hashids-scala) <!-- [![Build Status](https://drone.io/github.com/newhoggy/hashids-scala/status.png)](https://drone.io/github.com/newhoggy/hashids-scala/latest) -->
 
 A small Scala library to generate YouTube-like hashes from one or many numbers.
 
@@ -32,7 +30,7 @@ If you're using SBT, add the following lines to your build file:
 
 	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
 	
-    libraryDependencies += "com.timesprint" %% "hashids-scala" % "1.0-SNAPSHOT"
+    libraryDependencies += "com.timesprint" %% "hashids-scala" % "1.0.0"
 
 ## Usage
 
@@ -89,7 +87,7 @@ val numbers = hashids.decode("NkK9")
 ```scala
 
 val hashids = Hashids("this is my salt")
-val hash = hashids.encode(Seq)
+val hash = hashids.encode(683L, 94108L, 123L, 5L)
 ```
 
 `hash` is now going to be:
