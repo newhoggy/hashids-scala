@@ -1,5 +1,7 @@
 val gitBranch = ("git rev-parse --abbrev-ref HEAD"!!).trim
 
+val gitTag = ("git describe"!!).trim
+
 name := "hashids-scala"
 
 organization := "com.timesprint"
@@ -8,8 +10,11 @@ version := {
   val NNB = """([0-9]+)\.([0-9]+)-branch""".r
   val NNN = """([0-9]+)\.([0-9]+).([0-9]+)""".r
   gitBranch match {
+    case "HEAD" => gitTag match {
+      case NNN(major, minor, build) => s"$major.$minor.$build"
+      case value                    => s"unversioned-$value"
+    }
     case NNB(major, minor       ) => s"$major.$minor-SNAPSHOT"
-    case NNN(major, minor, build) => s"$major.$minor.$build"
     case value                    => s"unversioned-$value"
   }
 }
