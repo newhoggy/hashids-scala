@@ -86,4 +86,34 @@ class SpecHashids extends Specification {
     hashed must_== expected
     unhashed must_== List(data)
   }
+
+  "encodeHex" >> {
+    implicit val hashids = Hashids("this is my salt")
+
+    "encodes hex string" >> {
+      hashids.encodeHex("FA"         ) must_== "lzY"
+      hashids.encodeHex("26dd"       ) must_== "MemE"
+      hashids.encodeHex("FF1A"       ) must_== "eBMrb"
+      hashids.encodeHex("12abC"      ) must_== "D9NPE"
+      hashids.encodeHex("185b0"      ) must_== "9OyNW"
+      hashids.encodeHex("17b8d"      ) must_== "MRWNE"
+      hashids.encodeHex("1d7f21dd38" ) must_== "4o6Z7KqxE"
+      hashids.encodeHex("20015111d"  ) must_== "ooweQVNB"
+    }
+
+    "returns an empty string if passed non-hex string" >> {
+
+      hashids.encodeHex("XYZ123") must_== ""
+    }
+  }
+
+  "decodeHex" >> {
+    implicit val hashids = Hashids("this is my salt")
+
+    "decodes hex string" >> {
+      hashids.decodeHex("lzY"    ) must_== "FA"
+      hashids.decodeHex("eBMrb"  ) must_== "FF1A"
+      hashids.decodeHex("D9NPE"  ) must_== "12ABC"
+    }
+  }
 }

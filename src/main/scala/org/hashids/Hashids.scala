@@ -172,6 +172,23 @@ class Hashids private (
     }
   }
 
+  /**
+   * Decode hashid string to hex string.
+   *
+   * @param hash the encrypt string
+   * @return decryped numbers
+   */
+  def decodeHex(hash: String): String = {
+    var result = "";
+    val numbers = this.decode(hash)
+
+    for (number <- numbers) {
+      result += java.lang.Long.toHexString(number).substring(1).toUpperCase
+    }
+
+    return result
+  }
+
   private def _encode(numbers: Long*): String = {
     var numberHashInt = 0
 
