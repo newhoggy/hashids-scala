@@ -1,8 +1,18 @@
+val gitBranch = ("git rev-parse --abbrev-ref HEAD"!!).trim
+
 name := "hashids-scala"
 
 organization := "com.timesprint"
 
-version := "1.0-SNAPSHOT"
+version := {
+  val NNB = """([0-9]+)\.([0-9]+)-branch""".r
+  val NNN = """([0-9]+)\.([0-9]+).([0-9]+)""".r
+  gitBranch match {
+    case NNB(major, minor       ) => s"$major.$minor-SNAPSHOT"
+    case NNN(major, minor, build) => s"$major.$minor.$build"
+    case value                    => s"unversioned-$value"
+  }
+}
 
 crossScalaVersions := Seq("2.10.4", "2.11.2")
 
