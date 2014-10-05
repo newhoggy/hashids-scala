@@ -1,280 +1,237 @@
 package org.hashids
 
-object Hashids {
-  val defaultAlphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-  val defaultSeps: String = "cfhistuCFHISTU"
+import scala.annotation.tailrec
 
-  def apply(
-      salt: String = "",
-      minHashLength: Int = 0,
-      alphabet: String = defaultAlphabet,
-      seps: String = defaultSeps): Hashids = {
-    val sepDiv: Double = 3.5
-    val guardDiv: Int = 12
-    val minAlphabetLength: Int = 16
-    var guards: String = ""
-    val myMinHashLength = minHashLength max 0
+class Hashids(
+  salt: String = "",
+  minHashLength: Int = 0,
+  alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+) {
 
-    var distinctAlphabet = alphabet.distinct
+  require(alphabet.length == alphabet.distinct.length , "check your alphabet for duplicates")
+  require(alphabet.length >= 16, "alphabet must contain at least 16 characters")
+  require(alphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
 
-    if (distinctAlphabet.length < minAlphabetLength) {
-      throw new IllegalArgumentException(s"alphabet must contain at least $minAlphabetLength unique characters")
-    }
+  private val sepDiv = 3.5
+  private val guardDiv = 12
 
-    if (distinctAlphabet.contains(" ")) {
-      throw new IllegalArgumentException("alphabet cannot contains spaces")
-    }
+  private val (seps, guards, effectiveAlphabet) = {
+    val filteredSeps = "cfhistuCFHISTU".filter(x => alphabet.contains(x))
+    val filteredAlphabet = alphabet.filterNot(x => filteredSeps.contains(x))
+    val shuffledSeps = consistentShuffle(filteredSeps, salt)
 
-    // seps should contain only characters present in alphabet
-    // alphabet should not contains seps
-    var myAlphabet = distinctAlphabet diff seps
-    var mySeps = distinctAlphabet intersect seps
+    val (tmpSeps, tmpAlpha) =
+      if (shuffledSeps.isEmpty || ((filteredAlphabet.length / shuffledSeps.length) > sepDiv)) {
+        val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
+        val sepsLen = if(sepsTmpLen == 1) 2 else sepsTmpLen
 
-    myAlphabet = myAlphabet.replaceAll("\\s+", "")
-    mySeps = mySeps.replaceAll("\\s+", "")
-    mySeps = consistentShuffle(mySeps, salt)
+        if(sepsLen > shuffledSeps.length) {
+          val diff = sepsLen - shuffledSeps.length
+          val seps =  shuffledSeps + filteredAlphabet.substring(0, diff)
+          val alpha = filteredAlphabet.substring(diff)
+          (seps, alpha)
+        } else {
+          val seps = shuffledSeps.substring(0, sepsLen)
+          val alpha = filteredAlphabet
+          (seps, alpha)
+        }
+      } else (shuffledSeps, filteredAlphabet)
 
-    if (mySeps == "" || (myAlphabet.length / mySeps.length) > sepDiv) {
-      var seps_len: Int = (myAlphabet.length / sepDiv).ceil.toInt
+    val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
+    val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
 
-      if (seps_len == 1) {
-        seps_len += 1
-      }
-
-      if (seps_len > mySeps.length) {
-        val diff = seps_len - mySeps.length
-        mySeps += myAlphabet.take(diff)
-        myAlphabet = myAlphabet.drop(diff)
-      } else {
-        mySeps = mySeps.take(seps_len)
-      }
-    }
-
-    myAlphabet = consistentShuffle(myAlphabet, salt)
-
-    val guardCount = (myAlphabet.length.toDouble / guardDiv).ceil.toInt
-
-    if (myAlphabet.length < 3) {
-      guards = mySeps.take(guardCount)
-      mySeps = mySeps.drop(guardCount)
+    if(shuffledAlpha.length < 3) {
+      val guards = tmpSeps.substring(0, guardCount)
+      val seps = tmpSeps.substring(guardCount)
+      (seps, guards, shuffledAlpha)
     } else {
-      guards = myAlphabet.take(guardCount)
-      myAlphabet = myAlphabet.drop(guardCount)
-    }
-
-    new Hashids(
-        salt,
-        myMinHashLength,
-        myAlphabet,
-        mySeps,
-        guards)
-  }
-
-  private def consistentShuffle(alphabet: String, salt: String): String = {
-    if (salt.length <= 0) {
-      return alphabet
-    }
-
-    val as = alphabet.toCharArray
-    var p = 0
-
-    for (i <- (as.length - 1) until 0 by -1) {
-      val v = (as.length - 1 - i) % salt.length
-      val asc_val = salt(v).toInt
-      p += asc_val
-      val j = (asc_val + v + p) % i
-
-      val tmp = as(j)
-      as(j) = as(i)
-      as(i) = tmp
-    }
-
-    return new String(as)
-  }
-
-  private def hash(input: Long, alphabet: String): String = {
-    var hash = ""
-    val alphabetLen = alphabet.length
-    var myInput = input
-
-    do {
-      hash = alphabet((myInput % alphabetLen).toInt) + hash
-      myInput /= alphabetLen
-    } while (myInput > 0)
-
-    return hash
-  }
-
-  private def unhash(input: String, alphabet: String): Long = {
-    var number = 0L
-
-    for (i <- 0 until input.length) {
-      val pos = alphabet.indexOf(input(i))
-      number += (pos * scala.math.pow(alphabet.length, input.length - i - 1)).toLong
-    }
-
-    return number
-  }
-}
-
-class Hashids private (
-    salt: String,
-    minHashLength: Int,
-    alphabet: String,
-    seps: String,
-    guards: String) {
-  /**
-   * Encode numbers to string
-   *
-   * @param numbers the numbers to encrypt
-   * @return the encrypt string
-   */
-  def encode(numbers: Long*): String = {
-    if (numbers.length == 0) {
-      return ""
-    }
-
-    return this._encode(numbers: _*)
-  }
-
-  /**
-   * Decode string to numbers
-   *
-   * @param hash the encrypt string
-   * @return decryped numbers
-   */
-  def decode(hash: String): Seq[Long] = {
-    if (hash == "")
-      return Seq.empty
-
-    return this._decode(hash, this.alphabet)
-  }
-
-  /**
-   * Encode string representation of hexadecimal number to hashid.
-   *
-   * @param hexa the hexa to encrypt
-   * @return the encrypt string
-   */
-  def encodeHex(hexa: String): String = {
-    if (!hexa.matches("^[0-9a-fA-F]+$")) {
-      ""
-    } else {
-      var matched = List.empty[Long]
-      val matcher = java.util.regex.Pattern.compile("[\\w\\W]{1,12}").matcher(hexa)
-
-      while (matcher.find()) {
-        val group = matcher.group()
-        matched = java.lang.Long.parseLong("1" + group, 16) :: matched
-      }
-
-      this._encode(matched.reverse: _*)
+      val guards = shuffledAlpha.substring(0, guardCount)
+      val alpha = shuffledAlpha.substring(guardCount)
+      (tmpSeps, guards, alpha)
     }
   }
 
-  /**
-   * Decode hashid string to hex string.
-   *
-   * @param hash the encrypt string
-   * @return decryped numbers
-   */
-  def decodeHex(hash: String): String = {
-    var result = "";
-    val numbers = this.decode(hash)
+  def encode(numbers: Long*): String =
+    if(numbers.isEmpty) "" else _encode(numbers:_*)
 
-    for (number <- numbers) {
-      result += java.lang.Long.toHexString(number).substring(1).toUpperCase
+  def encodeHex(in: String): String = {
+    require(in.matches("^[0-9a-fA-F]+$"), "Not a HEX string")
+
+    val matcher = "[\\w\\W]{1,12}".r.pattern.matcher(in)
+
+    @tailrec
+    def doSplit(result: List[Long]): List[Long] = {
+      if (matcher.find()) doSplit(java.lang.Long.parseLong("1" + matcher.group, 16) :: result)
+      else result
     }
 
-    return result
+    _encode(doSplit(Nil):_*)
   }
 
   private def _encode(numbers: Long*): String = {
-    var numberHashInt = 0
-
-    for (i <- 0 until numbers.size) {
-      numberHashInt += (numbers(i) % (i + 100)).toInt
+    val indexedNumbers = numbers.zipWithIndex
+    val numberHash = indexedNumbers
+      .foldLeft[Int](0){ case (acc, (x, i)) =>
+        acc + (x % (i+100)).toInt
     }
+    val lottery = effectiveAlphabet.charAt(numberHash % effectiveAlphabet.length).toString
 
-    var alphabet = this.alphabet
-    val ret = alphabet(numberHashInt % alphabet.length)
-    val lottery = ret
-    var ret_str = ret + ""
+    val (tmpResult, tmpAlpha) =
+      indexedNumbers.foldLeft[(String, String)]((lottery, effectiveAlphabet)) {
+        case ((result, alpha), (x, i)) =>
+          val buffer = lottery + salt + alpha
+          val newAlpha = consistentShuffle(alpha, buffer.substring(0, alpha.length))
+          val last = hash(x, newAlpha)
+          val newResult = result + last
 
-    for (i <- 0 until numbers.length) {
-      var num = numbers(i)
-      val buffer = lottery + this.salt + alphabet
+          if (i + 1 < numbers.size) {
+            val num = x % (last.codePointAt(0) + i)
+            val sepsIndex = (num % seps.length).toInt
+            (newResult + seps.charAt((num % seps.length).toInt), newAlpha)
+          } else {
+            (newResult, newAlpha)
+          }
+      }
 
-      alphabet = Hashids.consistentShuffle(alphabet, buffer.take(alphabet.length))
-      val last = Hashids.hash(num, alphabet)
+    val provisionalResult = if(tmpResult.length < minHashLength) {
+      val guardIndex = (numberHash + tmpResult.codePointAt(0)) % guards.length
+      val guard = guards.charAt(guardIndex)
 
-      ret_str += last
+      val provResult = guard + tmpResult
 
-      if (i + 1 < numbers.length) {
-        num %= (last(0) + i).toInt
-        val sepsIndex = (num % this.seps.length).toInt
-        ret_str += this.seps(sepsIndex)
+      if(provResult.length < minHashLength) {
+        val guardIndex = (numberHash + provResult.codePointAt(2)) % guards.length
+        val guard = guards.charAt(guardIndex)
+        provResult + guard
+      } else {
+        provResult
+      }
+    } else tmpResult
+
+    val halfLen = tmpAlpha.length / 2
+
+    @tailrec
+    def respectMinHashLength(alpha: String, res: String): String = {
+      if (res.length >= minHashLength) res
+      else {
+        val newAlpha = consistentShuffle(alpha, alpha);
+        val tmpRes = newAlpha.substring(halfLen) + res + newAlpha.substring(0, halfLen);
+        val excess = tmpRes.length - minHashLength
+        val newRes = if(excess > 0) {
+          val startPos = excess / 2
+          tmpRes.substring(startPos, startPos + minHashLength)
+        } else tmpRes
+        respectMinHashLength(newAlpha, newRes)
       }
     }
 
-    if (ret_str.length < this.minHashLength) {
-      var guardIndex = (numberHashInt + ret_str(0).toInt) % this.guards.length
-      var guard = this.guards(guardIndex)
-
-      ret_str = guard + ret_str
-
-      if (ret_str.length < this.minHashLength) {
-        guardIndex = (numberHashInt + ret_str(2).toInt) % this.guards.length
-        guard = this.guards(guardIndex)
-
-        ret_str += guard
-      }
-    }
-
-    val halfLen = alphabet.length / 2
-    while (ret_str.length < this.minHashLength) {
-      alphabet = Hashids.consistentShuffle(alphabet, alphabet)
-      ret_str = alphabet.drop(halfLen) + ret_str + alphabet.take(halfLen)
-      val excess = ret_str.length - this.minHashLength
-      if (excess > 0) {
-        val start_pos = excess / 2
-        ret_str = ret_str.substring(start_pos, start_pos + this.minHashLength)
-      }
-    }
-
-    return ret_str
+    respectMinHashLength(tmpAlpha, provisionalResult)
   }
 
-  private def _decode(hash: String, alphabet: String): Seq[Long] = {
-    var myAlphabet = alphabet
-    var ret = List.empty[Long]
-
-    var i = 0
-    var hashBreakdown = hash.map(c => if (guards.contains(c)) ' ' else c)
-    var hashArray = hashBreakdown.split(" ")
-
-    if (hashArray.length == 3 || hashArray.length == 2) {
-      i = 1
-    }
-
-    hashBreakdown = hashArray(i)
-
-    val lottery = hashBreakdown(0)
-    hashBreakdown = hashBreakdown.drop(1)
-    hashBreakdown = hashBreakdown.map(c => if (seps.contains(c)) ' ' else c)
-    hashArray = hashBreakdown.split(" ")
-
-    for (aHashArray <- hashArray) {
-      val subHash = aHashArray
-      val buffer = lottery + this.salt + myAlphabet
-      myAlphabet = Hashids.consistentShuffle(myAlphabet, buffer.take(myAlphabet.length))
-      ret ::= Hashids.unhash(subHash, myAlphabet)
-    }
-
-    val seq = ret.reverse
-
-    if (encode(seq: _*) == hash) seq else Seq.empty
+  def decode(hash: String): List[Long] = hash match {
+    case "" => Nil
+    case x => _decode(x, effectiveAlphabet)
   }
 
-  def version: String = "1.0.0"
+  def decodeHex(hash: String): String =
+    decode(hash).map(x => x.toHexString.substring(1).toUpperCase).mkString
+
+  private def _decode(hash: String, alphabet: String): List[Long] = {
+    val hashArray = hash.split(s"[$guards]")
+    val i = if(hashArray.length == 3 || hashArray.length == 2) 1 else 0
+    val lottery = hashArray(i).charAt(0)
+    val hashBreakdown = hashArray(i).substring(1).split(s"[$seps]")
+
+    @tailrec
+    def doDecode(in: List[String], buff: String,
+      alpha: String, result: List[Long]): List[Long] = in match {
+      case Nil => result.reverse
+      case x :: tail =>
+        val newBuf = lottery + salt + alpha
+        val newAlpha = consistentShuffle(alpha, buff.substring(0, alpha.length))
+        doDecode(tail, lottery + this.salt + newAlpha, newAlpha, unhash(x, newAlpha) :: result)
+    }
+
+    doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
+  }
+
+
+  def consistentShuffle(alphabet: String, salt: String): String = {
+    @tailrec
+    def doShuffle(i: Int, v: Int, p: Int, result: String): String = {
+      if (i <= 0) {
+        result
+      } else {
+        val newV = v % salt.length;
+        val ascii = salt.codePointAt(newV)
+        val newP = p + ascii
+        val j = (ascii + newV + newP) % i
+        val tmp = result.charAt(j)
+
+        val alphaSuff = result.substring(0, j) + result.charAt(i) + result.substring(j + 1)
+        val res = alphaSuff.substring(0, i) + tmp + alphaSuff.substring(i + 1)
+
+        doShuffle(i - 1, newV + 1, newP, res)
+      }
+    }
+
+    if(salt.length <= 0) alphabet
+    else doShuffle(alphabet.length - 1, 0, 0, alphabet)
+  }
+
+  private def hash(input: Long, alphabet: String): String = {
+    val alphaSize = alphabet.length.toLong
+
+    @tailrec
+    def doHash(in: Long, hash: String): String = {
+      if (in <= 0) hash
+      else {
+        val newIn = in / alphaSize
+        val newHash = alphabet.charAt((in % alphaSize).toInt) + hash
+        doHash(newIn, newHash)
+      }
+    }
+
+    doHash(input / alphaSize, alphabet.charAt((input % alphaSize).toInt).toString)
+  }
+
+  private def unhash(input: String, alphabet: String): Long =
+    input.zipWithIndex.foldLeft[Long](0L){case (acc, (in, i)) =>
+      acc + (alphabet.indexOf(in) *
+        Math.pow(alphabet.length, input.length - 1 - i)).toLong
+    }
+
+  def version = "1.0.0"
+
+}
+
+object Hashids {
+
+  implicit class HashidsLongOps(x: Long) {
+    def hashid(implicit hashids: Hashids): String = hashids.encode(x)
+  }
+
+  implicit class HashidsSeqLongOps(val self: Seq[Long]) {
+    def hashid(implicit hashids: Hashids): String = hashids.encode(self: _*)
+  }
+
+  implicit class HashidsArrayLongOps(val self: Array[Long]) {
+    def encodeHashid(implicit hashids: Hashids): String = hashids.encode(self: _*)
+  }
+
+  implicit class HashidsStringOps(x: String) {
+    def unhashid(implicit hashids: Hashids)   : Seq[Long] = hashids.decode(x)
+    def hashidHex(implicit hashids: Hashids)  : String = hashids.encodeHex(x)
+    def unhashidHex(implicit hashids: Hashids): String = hashids.decodeHex(x)
+  }
+
+  def apply(salt: String) =
+    new Hashids(salt)
+
+  def apply(salt: String, minHashLength: Int) =
+    new Hashids(salt, minHashLength)
+
+  def apply(salt: String, minHashLength: Int, alphabet: String) =
+    new Hashids(salt, minHashLength, alphabet)
+
 }
