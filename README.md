@@ -30,8 +30,8 @@ All (long) integers need to be greater than or equal to zero.
 
 If you're using SBT, add the following lines to your build file:
 
-	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
-	
+    resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+
     libraryDependencies += "com.timesprint" %% "hashids-scala" % "1.0.0"
 
 ## Usage
@@ -54,7 +54,7 @@ val hash = hashids.encode(12345L)
 
 `hash` is now going to be:
 
-	"NkK9"
+    "NkK9"
 
 #### Decrypting
 
@@ -68,7 +68,7 @@ val numbers = hashids.decode("NkK9")
 
 `numbers` is now going to be:
 
-	List(12345L): Seq[Long]
+    List(12345L): Seq[Long]
 
 #### Decrypting with different salt
 
@@ -82,7 +82,7 @@ val numbers = hashids.decode("NkK9")
 
 `numbers` is now going to be:
 
-	List(): Seq[Long]
+    List(): Seq[Long]
 
 #### Encrypting several numbers
 
@@ -94,7 +94,7 @@ val hash = hashids.encode(683L, 94108L, 123L, 5L)
 
 `hash` is now going to be:
 
-	"aBMswoO2UB3Sj"
+    "aBMswoO2UB3Sj"
 
 #### Decrypting is done the same way
 
@@ -106,7 +106,7 @@ val numbers = hashids.decode("aBMswoO2UB3Sj")
 
 `numbers` is now going to be:
 
-	List(683L, 94108L, 123L, 5L): Seq[Long]
+    List(683L, 94108L, 123L, 5L): Seq[Long]
 
 #### Encrypting and specifying minimum hash length
 
@@ -120,7 +120,7 @@ val hash = hashids.encode(1L)
 
 `hash` is now going to be:
 
-	"gB0NV05e"
+    "gB0NV05e"
 
 #### Decrypting
 
@@ -132,7 +132,7 @@ val numbers = hashids.decode("gB0NV05e")
 
 `numbers` is now going to be:
 
-	List(1L): Seq[Long]
+    List(1L): Seq[Long]
 
 #### Specifying custom hash alphabet
 
@@ -146,7 +146,7 @@ val hash = hashids.encode(1234567L)
 
 `hash` is now going to be:
 
-	"b332db5"
+    "b332db5"
 
 ## Randomness
 
@@ -163,7 +163,7 @@ val hash = hashids.encode(5L, 5L, 5L, 5L)
 
 You don't see any repeating patterns that might show there's 4 identical numbers in the hash:
 
-	"1Wc8cwcE"
+    "1Wc8cwcE"
 
 Same with incremented numbers:
 
@@ -175,7 +175,7 @@ val hash = hashids.encode(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
 
 `hash` will be :
 
-	"kRHnurhptKcjIDTWC3sx"
+    "kRHnurhptKcjIDTWC3sx"
 
 ### Incrementing number hashes:
 
@@ -192,20 +192,18 @@ val hash5 = hashids.encode(5L) /* rD */
 ## Implicit Scala Syntax
 
 `hashids-scala` also supports Scala idiomatic syntax for obtaining the hashids codec object from
-implicit scope.  Import `org.hashids.syntax._` to enable this support.
+implicit scope.  Import `org.hashids.Hashids._` to enable this support.
 
-In the following examples, the `Long` and `Seq[Long]` is pimped to support the
-`encodeHashid` method while `String` is pimped to support the `decodeHashid` method.
+In the following examples, the `Long` and `Seq[Long]` is lifted to support the
+`hashid` method while `String` is lifted to support the `unhashid`, `hashidHex` and `unhashidHex` methods.
 
 ```scala
-import org.hashids._
-import org.hashids.syntax._
+import org.hashids.Hashids, Hashids._
 
 implicit val hashids = Hashids("this is my salt")
-val hash1 = 12345L.encodeHashid
-val hash2 = List(1L, 2L, 3L).encodeHashid
-val unhashed = "NkK9".decodeHashid
-
+val hash1 = 12345L.hashid
+val hash2 = List(1L, 2L, 3L).hashid
+val unhashed = "NkK9".unhashid
 ```
 
 In future the library will be updated to implement this syntax using type traits.
@@ -216,7 +214,7 @@ This library was written with the intent of placing these hashes in visible plac
 
 Therefore, this algorithm tries to avoid generating most common English curse words with the default alphabet. This is done by never placing the following letters next to each other:
 
-	c, C, s, S, f, F, h, H, u, U, i, I, t, T
+    c, C, s, S, f, F, h, H, u, U, i, I, t, T
 
 ## Scaladoc
 [Scala API docs](http://newhoggy.github.io/hashids/api/scala_2.11/1.0.0)
@@ -228,4 +226,3 @@ Follow me [@newhoggy](https://twitter.com/newhoggy) or [@IvanAkimov](http://twit
 ## License
 
 MIT License. See the `LICENSE` file.
-
