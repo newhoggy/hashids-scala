@@ -104,6 +104,13 @@ class SpecHashids extends Specification {
     unhashed must_== List(data)
   }
 
+  "Reject decoding with different salt" >> {
+    val hashid = Hashids("this is my salt")
+    val hash = hashid.encode(10L)
+
+    (Hashids("different salt").decode(hash)) must throwA[IllegalStateException]
+  }
+
   "encodeHex" >> {
     val hashids = Hashids("this is my salt")
 

@@ -130,7 +130,10 @@ class Hashids(
 
   def decode(hash: String): List[Long] = hash match {
     case "" => Nil
-    case x => _decode(x, effectiveAlphabet)
+    case x =>
+      val res = _decode(x, effectiveAlphabet)
+      if (encode(res:_*) == hash) res
+      else throw new IllegalStateException(s"Hash $hash was generated with different Hashids salt/alphabet")
   }
 
   def decodeHex(hash: String): String =
