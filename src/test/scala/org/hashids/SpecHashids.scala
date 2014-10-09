@@ -36,20 +36,12 @@ class SpecHashids extends Specification {
     unhashed must_== List(data)
   }
 
-  "Require alphabet with at least 16 chars" in {
+  "Require alphabet with at least 16 unique chars" in {
     (new Hashids(
       salt = "this is my salt",
-      alphabet = "1"
+      alphabet = "1123467890abcde"
     )) must throwA[IllegalArgumentException](
-      message = "alphabet must contain at least 16 characters")
-  }
-
-  "Require unique alphabet chars" in {
-    (new Hashids(
-      salt = "this is my salt",
-      alphabet = "1123467890abcdefghijklmnopqrstuvwxyz"
-    )) must throwA[IllegalArgumentException](
-      message = "check your alphabet for duplicates")
+      message = "alphabet must contain at least 16 unique characters")
   }
 
   "Deny spaces in alphabet" in {
@@ -104,11 +96,11 @@ class SpecHashids extends Specification {
     unhashed must_== List(data)
   }
 
-  "Reject decoding with different salt" >> {
+  "Decoding with different salt result's in empty list" >> {
     val hashid = Hashids("this is my salt")
     val hash = hashid.encode(10L)
 
-    (Hashids("different salt").decode(hash)) must throwA[IllegalStateException]
+    Hashids("different salt").decode(hash) must_== Nil
   }
 
   "encodeHex" >> {

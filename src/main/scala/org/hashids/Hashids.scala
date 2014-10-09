@@ -7,17 +7,17 @@ class Hashids(
   minHashLength: Int = 0,
   alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 ) {
+  private val distinctAlphabet = alphabet.distinct
 
-  require(alphabet.length == alphabet.distinct.length , "check your alphabet for duplicates")
-  require(alphabet.length >= 16, "alphabet must contain at least 16 characters")
-  require(alphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+  require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
+  require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
 
   private val sepDiv = 3.5
   private val guardDiv = 12
 
   private val (seps, guards, effectiveAlphabet) = {
-    val filteredSeps = "cfhistuCFHISTU".filter(x => alphabet.contains(x))
-    val filteredAlphabet = alphabet.filterNot(x => filteredSeps.contains(x))
+    val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
+    val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
     val shuffledSeps = consistentShuffle(filteredSeps, salt)
 
     val (tmpSeps, tmpAlpha) =
@@ -133,7 +133,7 @@ class Hashids(
     case x =>
       val res = _decode(x, effectiveAlphabet)
       if (encode(res:_*) == hash) res
-      else throw new IllegalStateException(s"Hash $hash was generated with different Hashids salt/alphabet")
+      else Nil
   }
 
   def decodeHex(hash: String): String =
