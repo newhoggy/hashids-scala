@@ -1,8 +1,8 @@
 package org.hashids
 
-import org.hashids.syntax._
 import org.scalacheck._
 import org.specs2._
+import Hashids._
 
 case class ZeroOrPosLong(value: Long)
 
@@ -16,23 +16,23 @@ class CheckHashids extends org.specs2.Specification with org.specs2.ScalaCheck {
       check { (a: List[ZeroOrPosLong], salt: String) =>
         implicit val hashid = Hashids(salt)
 
-        a.raw.encodeHashid.decodeHashid must_== a.raw
+        a.raw.hashid.unhashid must_== a.raw
       }
     } ^
     "List of random zero or positive longs should encode then decode" ! {
       check { (a: List[ZeroOrPosLong], salt: String) =>
         implicit val hashid = Hashids(salt = salt)
 
-        a.raw.encodeHashid.decodeHashid must_== a.raw
+        a.raw.hashid.unhashid must_== a.raw
       }
     } ^
     "List of random zero or positive longs should encode then decode and honour min hash length" ! {
       check { (a: List[ZeroOrPosLong], salt: String, minHashLength: Size) =>
         implicit val hashid = Hashids(salt = salt, minHashLength = minHashLength.size)
 
-        val hash = a.raw.encodeHashid
+        val hash = a.raw.hashid
 
-        hash.decodeHashid must_== a.raw
+        hash.unhashid must_== a.raw
         hash.length must be >= minHashLength.size when !a.isEmpty
       }
     } ^ end
