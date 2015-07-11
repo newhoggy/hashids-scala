@@ -3,10 +3,9 @@ package org.hashids
 import scala.annotation.tailrec
 
 class Hashids(
-  salt: String = "",
-  minHashLength: Int = 0,
-  alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-) {
+    salt: String = "",
+    minHashLength: Int = 0,
+    alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") {
   private val distinctAlphabet = alphabet.distinct
 
   require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
@@ -20,14 +19,14 @@ class Hashids(
     val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
     val shuffledSeps = consistentShuffle(filteredSeps, salt)
 
-    val (tmpSeps, tmpAlpha) =
+    val (tmpSeps, tmpAlpha) = {
       if (shuffledSeps.isEmpty || ((filteredAlphabet.length / shuffledSeps.length) > sepDiv)) {
         val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
-        val sepsLen = if(sepsTmpLen == 1) 2 else sepsTmpLen
+        val sepsLen = if (sepsTmpLen == 1) 2 else sepsTmpLen
 
-        if(sepsLen > shuffledSeps.length) {
+        if (sepsLen > shuffledSeps.length) {
           val diff = sepsLen - shuffledSeps.length
-          val seps =  shuffledSeps + filteredAlphabet.substring(0, diff)
+          val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
           val alpha = filteredAlphabet.substring(diff)
           (seps, alpha)
         } else {
@@ -36,11 +35,12 @@ class Hashids(
           (seps, alpha)
         }
       } else (shuffledSeps, filteredAlphabet)
+    }
 
     val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
     val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
 
-    if(shuffledAlpha.length < 3) {
+    if (shuffledAlpha.length < 3) {
       val guards = tmpSeps.substring(0, guardCount)
       val seps = tmpSeps.substring(guardCount)
       (seps, guards, shuffledAlpha)
@@ -51,8 +51,7 @@ class Hashids(
     }
   }
 
-  def encode(numbers: Long*): String =
-    if(numbers.isEmpty) "" else _encode(numbers:_*)
+  def encode(numbers: Long*): String = if (numbers.isEmpty) "" else _encode(numbers:_*)
 
   def encodeHex(in: String): String = {
     require(in.matches("^[0-9a-fA-F]+$"), "Not a HEX string")
@@ -61,8 +60,10 @@ class Hashids(
 
     @tailrec
     def doSplit(result: List[Long]): List[Long] = {
-      if (matcher.find()) doSplit(java.lang.Long.parseLong("1" + matcher.group, 16) :: result)
-      else result
+      if (matcher.find())
+        doSplit(java.lang.Long.parseLong("1" + matcher.group, 16) :: result)
+      else
+        result
     }
 
     _encode(doSplit(Nil):_*)
@@ -93,27 +94,30 @@ class Hashids(
           }
       }
 
-    val provisionalResult = if(tmpResult.length < minHashLength) {
-      val guardIndex = (numberHash + tmpResult.codePointAt(0)) % guards.length
-      val guard = guards.charAt(guardIndex)
-
-      val provResult = guard + tmpResult
-
-      if(provResult.length < minHashLength) {
-        val guardIndex = (numberHash + provResult.codePointAt(2)) % guards.length
+    val provisionalResult = {
+      if (tmpResult.length < minHashLength) {
+        val guardIndex = (numberHash + tmpResult.codePointAt(0)) % guards.length
         val guard = guards.charAt(guardIndex)
-        provResult + guard
-      } else {
-        provResult
-      }
-    } else tmpResult
+
+        val provResult = guard + tmpResult
+
+        if (provResult.length < minHashLength) {
+          val guardIndex = (numberHash + provResult.codePointAt(2)) % guards.length
+          val guard = guards.charAt(guardIndex)
+          provResult + guard
+        } else {
+          provResult
+        }
+      } else tmpResult
+    }
 
     val halfLen = tmpAlpha.length / 2
 
     @tailrec
     def respectMinHashLength(alpha: String, res: String): String = {
-      if (res.length >= minHashLength) res
-      else {
+      if (res.length >= minHashLength) {
+        res
+      } else {
         val newAlpha = consistentShuffle(alpha, alpha);
         val tmpRes = newAlpha.substring(halfLen) + res + newAlpha.substring(0, halfLen);
         val excess = tmpRes.length - minHashLength
@@ -132,22 +136,25 @@ class Hashids(
     case "" => Nil
     case x =>
       val res = _decode(x, effectiveAlphabet)
-      if (encode(res:_*) == hash) res
-      else Nil
+      if (encode(res:_*) == hash) res else Nil
   }
 
-  def decodeHex(hash: String): String =
-    decode(hash).map(x => x.toHexString.substring(1).toUpperCase).mkString
+  def decodeHex(hash: String): String = {
+    decode(hash).map { x =>
+      x.toHexString.substring(1).toUpperCase
+    }.mkString
+  }
 
   private def _decode(hash: String, alphabet: String): List[Long] = {
     val hashArray = hash.split(s"[$guards]")
-    val i = if(hashArray.length == 3 || hashArray.length == 2) 1 else 0
+    val i = if (hashArray.length == 3 || hashArray.length == 2) 1 else 0
     val lottery = hashArray(i).charAt(0)
     val hashBreakdown = hashArray(i).substring(1).split(s"[$seps]")
 
     @tailrec
-    def doDecode(in: List[String], buff: String,
-      alpha: String, result: List[Long]): List[Long] = in match {
+    def doDecode(
+        in: List[String], buff: String,
+        alpha: String, result: List[Long]): List[Long] = in match {
       case Nil => result.reverse
       case x :: tail =>
         val newBuf = lottery + salt + alpha
@@ -178,8 +185,7 @@ class Hashids(
       }
     }
 
-    if(salt.length <= 0) alphabet
-    else doShuffle(alphabet.length - 1, 0, 0, alphabet)
+    if (salt.length <= 0) alphabet else doShuffle(alphabet.length - 1, 0, 0, alphabet)
   }
 
   private def hash(input: Long, alphabet: String): String = {
@@ -187,8 +193,9 @@ class Hashids(
 
     @tailrec
     def doHash(in: Long, hash: String): String = {
-      if (in <= 0) hash
-      else {
+      if (in <= 0) {
+        hash
+      } else {
         val newIn = in / alphaSize
         val newHash = alphabet.charAt((in % alphaSize).toInt) + hash
         doHash(newIn, newHash)
@@ -199,17 +206,14 @@ class Hashids(
   }
 
   private def unhash(input: String, alphabet: String): Long =
-    input.zipWithIndex.foldLeft[Long](0L){case (acc, (in, i)) =>
-      acc + (alphabet.indexOf(in) *
-        Math.pow(alphabet.length, input.length - 1 - i)).toLong
+    input.zipWithIndex.foldLeft[Long](0L) {case (acc, (in, i)) =>
+      acc + (alphabet.indexOf(in) * Math.pow(alphabet.length, input.length - 1 - i)).toLong
     }
 
   def version = "1.0.0"
-
 }
 
 object Hashids {
-
   implicit class HashidsLongOps(x: Long) {
     def hashid(implicit hashids: Hashids): String = hashids.encode(x)
   }
@@ -236,5 +240,4 @@ object Hashids {
 
   def apply(salt: String, minHashLength: Int, alphabet: String) =
     new Hashids(salt, minHashLength, alphabet)
-
 }
