@@ -9,6 +9,7 @@ object Multibuild extends Build with Version {
     def standard: Project = {
       self
           .settings(organization := "io.john-ky")
+          .settings(resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases")
           .settings(scalacOptions := Seq(
               "-feature",
               "-deprecation",
@@ -17,7 +18,7 @@ object Multibuild extends Build with Version {
               "-Yrangepos",
               "-encoding",
               "utf8"))
-          .settings(scalacOptions in (console) += "-Yrangepos")
+          .settings(scalacOptions in Test ++= Seq("-Yrangepos"))
     }
 
     def notPublished: Project = {
