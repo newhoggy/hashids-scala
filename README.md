@@ -196,7 +196,8 @@ In the following examples, the `Long` and `Seq[Long]` is lifted to support the
 `hashid` method while `String` is lifted to support the `unhashid`, `hashidHex` and `unhashidHex` methods.
 
 ```scala
-import org.hashids.Hashids, Hashids._
+import org.hashids.Hashids
+import org.hashids.syntax._
 
 implicit val hashids = Hashids("this is my salt")
 val hash1 = 12345L.hashid
