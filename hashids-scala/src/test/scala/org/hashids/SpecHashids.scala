@@ -1,11 +1,9 @@
 package org.hashids
 
+import org.hashids.syntax._
 import org.specs2.mutable._
-import org.scalacheck._
-import Hashids._
 
 class SpecHashids extends Specification {
-
   "One number should encode then decode" >> {
     implicit val hashids = Hashids("this is my salt")
     val expected = "NkK9"
@@ -37,18 +35,18 @@ class SpecHashids extends Specification {
   }
 
   "Require alphabet with at least 16 unique chars" in {
-    (new Hashids(
+    new Hashids(
       salt = "this is my salt",
       alphabet = "1123467890abcde"
-    )) must throwA[IllegalArgumentException](
+    ) must throwA[IllegalArgumentException](
       message = "alphabet must contain at least 16 unique characters")
   }
 
   "Deny spaces in alphabet" in {
-    (new Hashids(
+    new Hashids(
       salt = "this is my salt",
       alphabet = "1234567890 abcdefghijklmnopqrstuvwxyz"
-    )) must throwA[IllegalArgumentException](
+    ) must throwA[IllegalArgumentException](
       message = "alphabet cannot contains spaces")
   }
 
