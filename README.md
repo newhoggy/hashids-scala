@@ -28,8 +28,8 @@ All (long) integers need to be greater than or equal to zero.
 
 If you're using SBT, add the following lines to your build file:
 
-    resolvers += "dl-john-ky"      at "http://dl.john-ky.io/maven/releases"
-    
+    resolvers += "dl-john-ky" at "http://dl.john-ky.io/maven/releases"
+
     libraryDependencies += "io.john-ky" %% "hashids-scala" % "1.1.0-448df98"
 
 ## Usage
