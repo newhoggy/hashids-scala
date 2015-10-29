@@ -2,6 +2,7 @@ package org.hashids
 
 import org.hashids.syntax._
 import org.specs2.mutable._
+import org.hashids.impl._
 
 class SpecHashids extends Specification {
   "One number should encode then decode" >> {
@@ -129,5 +130,18 @@ class SpecHashids extends Specification {
       hashids.decodeHex("eBMrb"  ) must_== "FF1A"
       hashids.decodeHex("D9NPE"  ) must_== "12ABC"
     }
+  }
+
+  "Should be compatible with Javascript reference implementation" >> {
+    "for salt = 'MyCamelCaseSalt', max length = 10, alphabet = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'" >> {
+      val hashids = Hashids("MyCamelCaseSalt", 10, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789")
+
+      val raw = 1145
+      val encoded = hashids.encode(raw)
+      val decoded = hashids.decode(encoded)
+      
+      encoded ==== "9Q7MJ3LVGW"
+      decoded ==== List(raw)
+    }.pendingUntilFixed
   }
 }
