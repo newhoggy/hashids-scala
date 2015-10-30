@@ -2,7 +2,6 @@ package org.hashids
 
 import org.hashids.syntax._
 import org.specs2.mutable._
-import org.hashids.impl._
 
 class SpecHashids extends Specification {
   "One number should encode then decode" >> {

@@ -1,20 +1,20 @@
 package org.hashids
 
 import scala.annotation.tailrec
+import org.hashids.impl._
 
 class Hashids(
     salt: String = "",
     minHashLength: Int = 0,
     alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") {
-  private val distinctAlphabet = alphabet.distinct
-
-  require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
-  require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
-
-  private val sepDiv = 3.5
-  private val guardDiv = 12
-
   private val (seps, guards, effectiveAlphabet) = {
+    val distinctAlphabet = alphabet.distinct
+
+    require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
+    require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+
+    val sepDiv = 3.5
+    val guardDiv = 12
     val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
     val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
     val shuffledSeps = consistentShuffle(filteredSeps, salt)
@@ -163,28 +163,6 @@ class Hashids(
     }
 
     doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
-  }
-
-  def consistentShuffle(alphabet: String, salt: String): String = {
-    @tailrec
-    def doShuffle(i: Int, v: Int, p: Int, result: String): String = {
-      if (i <= 0) {
-        result
-      } else {
-        val newV = v % salt.length;
-        val ascii = salt.codePointAt(newV)
-        val newP = p + ascii
-        val j = (ascii + newV + newP) % i
-        val tmp = result.charAt(j)
-
-        val alphaSuff = result.substring(0, j) + result.charAt(i) + result.substring(j + 1)
-        val res = alphaSuff.substring(0, i) + tmp + alphaSuff.substring(i + 1)
-
-        doShuffle(i - 1, newV + 1, newP, res)
-      }
-    }
-
-    if (salt.length <= 0) alphabet else doShuffle(alphabet.length - 1, 0, 0, alphabet)
   }
 
   private def hash(input: Long, alphabet: String): String = {
