@@ -5,7 +5,7 @@ import org.specs2.mutable._
 
 class SpecHashids extends Specification {
   "One number should encode then decode" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     val expected = "NkK9"
     val data = 12345L
     val hashed = data.hashid
@@ -15,7 +15,7 @@ class SpecHashids extends Specification {
   }
 
   "Several numbers should encode then decode" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     val expected = "aBMswoO2UB3Sj"
     val data = Seq[Long](683L, 94108L, 123L, 5L)
     val hashed = data.hashid
@@ -25,7 +25,7 @@ class SpecHashids extends Specification {
   }
 
   "One number should encode then decode with salt" >> {
-    implicit val hashids = Hashids("this is my salt", 8)
+    implicit val hashids = Hashids.reference("this is my salt", 8)
     val expected = "gB0NV05e"
     val data = 1L
     val hashed = data.hashid
@@ -35,7 +35,7 @@ class SpecHashids extends Specification {
   }
 
   "Require alphabet with at least 16 unique chars" in {
-    new Hashids(
+    Hashids.reference(
       salt = "this is my salt",
       alphabet = "1123467890abcde"
     ) must throwA[IllegalArgumentException](
@@ -43,7 +43,7 @@ class SpecHashids extends Specification {
   }
 
   "Deny spaces in alphabet" in {
-    new Hashids(
+    Hashids.reference(
       salt = "this is my salt",
       alphabet = "1234567890 abcdefghijklmnopqrstuvwxyz"
     ) must throwA[IllegalArgumentException](
@@ -51,7 +51,7 @@ class SpecHashids extends Specification {
   }
 
   "Should be random" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     val expected = "1Wc8cwcE"
     val data = List[Long](5L, 5L, 5L, 5L)
     val hashed = data.hashid
@@ -61,7 +61,7 @@ class SpecHashids extends Specification {
   }
 
   "Hash for sequence of consecutive numbers should appear random" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     val expected = "kRHnurhptKcjIDTWC3sx"
     val data = List[Long](1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
     val hashed = data.hashid
@@ -71,7 +71,7 @@ class SpecHashids extends Specification {
   }
 
   "Sequence of hashes for consecutive numbers should appear random" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     1L.hashid must_== "NV"
     2L.hashid must_== "6m"
     3L.hashid must_== "yD"
@@ -80,12 +80,12 @@ class SpecHashids extends Specification {
   }
 
   "Max long value should encode" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     9876543210123L.hashid must_== "Y8r7W1kNN"
   }
 
   "Special number encode and decode" >> {
-    implicit val hashids = Hashids("this is my salt")
+    implicit val hashids = Hashids.reference("this is my salt")
     val expected = "3kK3nNOe"
     val data = 75527867232L
     val hashed = data.hashid
@@ -95,14 +95,14 @@ class SpecHashids extends Specification {
   }
 
   "Decoding with different salt result's in empty list" >> {
-    val hashid = Hashids("this is my salt")
+    val hashid = Hashids.reference("this is my salt")
     val hash = hashid.encode(10L)
 
-    Hashids("different salt").decode(hash) must_== Nil
+    Hashids.reference("different salt").decode(hash) must_== Nil
   }
 
   "encodeHex" >> {
-    val hashids = Hashids("this is my salt")
+    val hashids = Hashids.reference("this is my salt")
 
     "encodes hex string" >> {
       hashids.encodeHex("FA"         ) must_== "lzY"
@@ -122,7 +122,7 @@ class SpecHashids extends Specification {
   }
 
   "decodeHex" >> {
-    val hashids = Hashids("this is my salt")
+    val hashids = Hashids.reference("this is my salt")
 
     "decodes hex string" >> {
       hashids.decodeHex("lzY"    ) must_== "FA"
@@ -133,7 +133,7 @@ class SpecHashids extends Specification {
 
   "Should be compatible with Javascript reference implementation" >> {
     "for salt = 'MyCamelCaseSalt', max length = 10, alphabet = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'" >> {
-      val hashids = Hashids("MyCamelCaseSalt", 10, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789")
+      val hashids = Hashids.reference("MyCamelCaseSalt", 10, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789")
 
       val raw = 1145
       val encoded = hashids.encode(raw)
@@ -141,6 +141,6 @@ class SpecHashids extends Specification {
       
       encoded ==== "9Q7MJ3LVGW"
       decoded ==== List(raw)
-    }.pendingUntilFixed
+    }
   }
 }
