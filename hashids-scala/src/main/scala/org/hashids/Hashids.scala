@@ -157,35 +157,12 @@ class Hashids(
         alpha: String, result: List[Long]): List[Long] = in match {
       case Nil => result.reverse
       case x :: tail =>
-        val newBuf = lottery + salt + alpha
         val newAlpha = consistentShuffle(alpha, buff.substring(0, alpha.length))
         doDecode(tail, lottery + this.salt + newAlpha, newAlpha, unhash(x, newAlpha) :: result)
     }
 
     doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
   }
-
-  private def hash(input: Long, alphabet: String): String = {
-    val alphaSize = alphabet.length.toLong
-
-    @tailrec
-    def doHash(in: Long, hash: String): String = {
-      if (in <= 0) {
-        hash
-      } else {
-        val newIn = in / alphaSize
-        val newHash = alphabet.charAt((in % alphaSize).toInt) + hash
-        doHash(newIn, newHash)
-      }
-    }
-
-    doHash(input / alphaSize, alphabet.charAt((input % alphaSize).toInt).toString)
-  }
-
-  private def unhash(input: String, alphabet: String): Long =
-    input.zipWithIndex.foldLeft[Long](0L) {case (acc, (in, i)) =>
-      acc + (alphabet.indexOf(in) * Math.pow(alphabet.length, input.length - 1 - i)).toLong
-    }
 
   def version = "1.0.0"
 }

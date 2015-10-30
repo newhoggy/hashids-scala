@@ -24,4 +24,27 @@ package object impl {
 
     if (salt.length <= 0) alphabet else doShuffle(alphabet.length - 1, 0, 0, alphabet)
   }
+
+  def hash(input: Long, alphabet: String): String = {
+    val alphaSize = alphabet.length.toLong
+
+    @tailrec
+    def doHash(in: Long, hash: String): String = {
+      if (in <= 0) {
+        hash
+      } else {
+        val newIn = in / alphaSize
+        val newHash = alphabet.charAt((in % alphaSize).toInt) + hash
+        doHash(newIn, newHash)
+      }
+    }
+
+    doHash(input / alphaSize, alphabet.charAt((input % alphaSize).toInt).toString)
+  }
+
+  def unhash(input: String, alphabet: String): Long = {
+    input.zipWithIndex.foldLeft[Long](0L) { case (acc, (in, i)) =>
+      acc + (alphabet.indexOf(in) * Math.pow(alphabet.length, input.length - 1 - i)).toLong
+    }
+  }
 }
