@@ -14,7 +14,7 @@ class CheckHashids extends Specification with ScalaCheck {
 
   "List of random zero or positive longs should encode then decode" in {
     prop { (a: List[ZeroOrPosLong], salt: String) =>
-      implicit val hashid = Hashids(salt)
+      implicit val hashid = Hashids.reference(salt)
 
       a.raw.hashid.unhashid ==== a.raw
     }
@@ -22,7 +22,7 @@ class CheckHashids extends Specification with ScalaCheck {
 
   "List of random zero or positive longs should encode then decode" in {
     prop { (a: List[ZeroOrPosLong], salt: String) =>
-      implicit val hashid = Hashids(salt = salt)
+      implicit val hashid = Hashids.reference(salt = salt)
 
       a.raw.hashid.unhashid ==== a.raw
     }
@@ -30,7 +30,7 @@ class CheckHashids extends Specification with ScalaCheck {
 
   "List of random zero or positive longs should encode then decode and honour min hash length" in {
     prop { (a: List[ZeroOrPosLong], salt: String, minHashLength: Size) =>
-      implicit val hashid = Hashids(salt = salt, minHashLength = minHashLength.size)
+      implicit val hashid = Hashids.reference(salt = salt, minHashLength = minHashLength.size)
 
       val hash = a.raw.hashid
 

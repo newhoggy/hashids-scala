@@ -32,6 +32,20 @@ If you're using SBT, add the following lines to your build file:
 
     libraryDependencies += "io.john-ky" %% "hashids-scala" % "1.1.0-448df98"
 
+## Compatibility note
+
+In version `1.1.0`, the library contained a bug that caused it to generate hashids that were incompatibility with the
+Javascript reference implementation under some situations.  Applications upgrading from `1.1.0` to `1.1.1` will need to
+decide which of cross-language compatibility or backwards compatibility is more important.
+
+To ensure that the application writers make this decision carefully, the `Hashids.apply` method is deprecated and will
+now throw `NotImplementedException`.
+
+Application writers are must replace calls to `Hashids.apply` with one of the following:
+ 
+* `Hashids.legacyJiecao` - if backwards compatibility is important.
+* `Hashids.reference` - if cross-language compatibility is important.
+
 ## Usage
 
 #### Import the package
@@ -46,7 +60,7 @@ You can pass a unique salt value so your hashes differ from everyone else's.  "t
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val hash = hashids.encode(12345L)
 ```
 
@@ -60,7 +74,7 @@ Notice during decryption, same salt value is used:
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val numbers = hashids.decode("NkK9")
 ```
 
@@ -74,7 +88,7 @@ Decryption will not work if salt is changed:
 
 ```scala
 
-val hashids = Hashids("this is my pepper")
+val hashids = Hashids.reference("this is my pepper")
 val numbers = hashids.decode("NkK9")
 ```
 
@@ -86,7 +100,7 @@ val numbers = hashids.decode("NkK9")
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val hash = hashids.encode(683L, 94108L, 123L, 5L)
 ```
 
@@ -98,7 +112,7 @@ val hash = hashids.encode(683L, 94108L, 123L, 5L)
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val numbers = hashids.decode("aBMswoO2UB3Sj")
 ```
 
@@ -112,7 +126,7 @@ Here we encrypt integer 1, and set the minimum hash length to **8** (by default 
 
 ```scala
 
-val hashids = Hashids("this is my salt", 8)
+val hashids = Hashids.reference("this is my salt", 8)
 val hash = hashids.encode(1L)
 ```
 
@@ -124,7 +138,7 @@ val hash = hashids.encode(1L)
 
 ```scala
 
-val hashids = Hashids("this is my salt", 8)
+val hashids = Hashids.reference("this is my salt", 8)
 val numbers = hashids.decode("gB0NV05e")
 ```
 
@@ -138,7 +152,7 @@ Here we set the alphabet to consist of only four letters: "0123456789abcdef"
 
 ```scala
 
-val hashids = Hashids("this is my salt", 0, "0123456789abcdef")
+val hashids = Hashids.reference("this is my salt", 0, "0123456789abcdef")
 val hash = hashids.encode(1234567L)
 ```
 
@@ -155,7 +169,7 @@ Having said that, this algorithm does try to make these hashes unguessable and u
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val hash = hashids.encode(5L, 5L, 5L, 5L)
 ```
 
@@ -167,7 +181,7 @@ Same with incremented numbers:
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val hash = hashids.encode(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
 ```
 
@@ -179,7 +193,7 @@ val hash = hashids.encode(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
 
 ```scala
 
-val hashids = Hashids("this is my salt")
+val hashids = Hashids.reference("this is my salt")
 val hash1 = hashids.encode(1L) /* NV */
 val hash2 = hashids.encode(2L) /* 6m */
 val hash3 = hashids.encode(3L) /* yD */
@@ -199,7 +213,7 @@ In the following examples, the `Long` and `Seq[Long]` is lifted to support the
 import org.hashids.Hashids
 import org.hashids.syntax._
 
-implicit val hashids = Hashids("this is my salt")
+implicit val hashids = Hashids.reference("this is my salt")
 val hash1 = 12345L.hashid
 val hash2 = List(1L, 2L, 3L).hashid
 val unhashed = "NkK9".unhashid

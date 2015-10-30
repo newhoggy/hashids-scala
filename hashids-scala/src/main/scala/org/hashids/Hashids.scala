@@ -6,51 +6,10 @@ import org.hashids.impl._
 class Hashids(
     salt: String = "",
     minHashLength: Int = 0,
-    alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") {
-  private val (seps, guards, effectiveAlphabet) = {
-    val distinctAlphabet = alphabet.distinct
-
-    require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
-    require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
-
-    val sepDiv = 3.5
-    val guardDiv = 12
-    val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
-    val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
-    val shuffledSeps = consistentShuffle(filteredSeps, salt)
-
-    val (tmpSeps, tmpAlpha) = {
-      if (shuffledSeps.isEmpty || ((filteredAlphabet.length / shuffledSeps.length) > sepDiv)) {
-        val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
-        val sepsLen = if (sepsTmpLen == 1) 2 else sepsTmpLen
-
-        if (sepsLen > shuffledSeps.length) {
-          val diff = sepsLen - shuffledSeps.length
-          val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
-          val alpha = filteredAlphabet.substring(diff)
-          (seps, alpha)
-        } else {
-          val seps = shuffledSeps.substring(0, sepsLen)
-          val alpha = filteredAlphabet
-          (seps, alpha)
-        }
-      } else (shuffledSeps, filteredAlphabet)
-    }
-
-    val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
-    val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
-
-    if (shuffledAlpha.length < 3) {
-      val guards = tmpSeps.substring(0, guardCount)
-      val seps = tmpSeps.substring(guardCount)
-      (seps, guards, shuffledAlpha)
-    } else {
-      val guards = shuffledAlpha.substring(0, guardCount)
-      val alpha = shuffledAlpha.substring(guardCount)
-      (tmpSeps, guards, alpha)
-    }
-  }
-
+    alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+    seps: String,
+    guards: String,
+    effectiveAlphabet: String) {
   def encode(numbers: Long*): String = {
     if (numbers.isEmpty) {
       ""
@@ -88,12 +47,111 @@ class Hashids(
 }
 
 object Hashids {
-  def apply(salt: String) =
-    new Hashids(salt)
+  @deprecated("Use `Hashids.legacyJiecao` or `Hashids.reference` instead.  See compatibility note in README.md", "1.1.1")
+  def apply(
+      salt: String = "",
+      minHashLength: Int = 0,
+      alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"): Hashids = ???
 
-  def apply(salt: String, minHashLength: Int) =
-    new Hashids(salt, minHashLength)
+  def legacyJiecao(
+      salt: String = "",
+      minHashLength: Int = 0,
+      alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") = {
+    val (seps, guards, effectiveAlphabet) = {
+      val distinctAlphabet = alphabet.distinct
 
-  def apply(salt: String, minHashLength: Int, alphabet: String) =
-    new Hashids(salt, minHashLength, alphabet)
+      require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
+      require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+
+      val sepDiv = 3.5
+      val guardDiv = 12
+      val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
+      val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
+      val shuffledSeps = consistentShuffle(filteredSeps, salt)
+
+      val (tmpSeps, tmpAlpha) = {
+        if (shuffledSeps.isEmpty || ((filteredAlphabet.length / shuffledSeps.length) > sepDiv)) {
+          val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
+          val sepsLen = if (sepsTmpLen == 1) 2 else sepsTmpLen
+
+          if (sepsLen > shuffledSeps.length) {
+            val diff = sepsLen - shuffledSeps.length
+            val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
+            val alpha = filteredAlphabet.substring(diff)
+            (seps, alpha)
+          } else {
+            val seps = shuffledSeps.substring(0, sepsLen)
+            val alpha = filteredAlphabet
+            (seps, alpha)
+          }
+        } else (shuffledSeps, filteredAlphabet)
+      }
+
+      val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
+      val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
+
+      if (shuffledAlpha.length < 3) {
+        val guards = tmpSeps.substring(0, guardCount)
+        val seps = tmpSeps.substring(guardCount)
+        (seps, guards, shuffledAlpha)
+      } else {
+        val guards = shuffledAlpha.substring(0, guardCount)
+        val alpha = shuffledAlpha.substring(guardCount)
+        (tmpSeps, guards, alpha)
+      }
+    }
+
+    new Hashids(salt, minHashLength, alphabet, seps, guards, effectiveAlphabet)
+  }
+
+  def reference(
+      salt: String = "",
+      minHashLength: Int = 0,
+      alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") = {
+    val (seps, guards, effectiveAlphabet) = {
+      val distinctAlphabet = alphabet.distinct
+
+      require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
+      require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+
+      val sepDiv = 3.5
+      val guardDiv = 12
+      val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
+      val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
+      val shuffledSeps = consistentShuffle(filteredSeps, salt)
+
+      val (tmpSeps, tmpAlpha) = {
+        if (shuffledSeps.isEmpty || (Math.ceil(filteredAlphabet.length.toDouble / shuffledSeps.length) > sepDiv)) {
+          val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
+          val sepsLen = if (sepsTmpLen == 1) 2 else sepsTmpLen
+
+          if (sepsLen > shuffledSeps.length) {
+            val diff = sepsLen - shuffledSeps.length
+            val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
+            val alpha = filteredAlphabet.substring(diff)
+            (seps, alpha)
+          } else {
+            val seps = shuffledSeps.substring(0, sepsLen)
+            val alpha = filteredAlphabet
+            (seps, alpha)
+          }
+        } else (shuffledSeps, filteredAlphabet)
+      }
+
+      val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
+      val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
+
+      if (shuffledAlpha.length < 3) {
+        val guards = tmpSeps.substring(0, guardCount)
+        val seps = tmpSeps.substring(guardCount)
+        (seps, guards, shuffledAlpha)
+      } else {
+        val guards = shuffledAlpha.substring(0, guardCount)
+        val alpha = shuffledAlpha.substring(guardCount)
+        (tmpSeps, guards, alpha)
+      }
+    }
+
+    new Hashids(salt, minHashLength, alphabet, seps, guards, effectiveAlphabet)
+  }
 }
