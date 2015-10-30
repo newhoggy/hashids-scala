@@ -7,36 +7,6 @@ class Hashids(
     salt: String = "",
     minHashLength: Int = 0,
     alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") {
-  private def reorder(string: String, salt: String): String = {
-    val len_salt = salt.length
-
-    if (len_salt == 0) {
-      string
-    } else {
-      var i = string.length - 1
-      var index = 0
-      var integer_sum = 0
-      var temp_string = string
-
-      while (i > 0) {
-        index %= len_salt
-        val integer = salt(index).toInt
-        integer_sum += integer
-        val j = (integer + index + integer_sum) % i
-
-        val temp = temp_string(j)
-        val trailer = if (j + 1 < temp_string.length) temp_string.substring(j + 1) else ' '
-        temp_string = temp_string.substring(0, j) + temp_string(i) + trailer
-        temp_string = temp_string.substring(0, i) + temp + temp_string.substring(i + 1)
-
-        i -= 1
-        index += 1
-      }
-
-      temp_string
-    }
-  }
-
   val impl = {
     val distinctAlphabet = alphabet.distinct
 
@@ -48,7 +18,7 @@ class Hashids(
 
     val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
     val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
-    val shuffledSeps = reorder(filteredSeps, salt)
+    val shuffledSeps = consistentShuffle(filteredSeps, salt)
 
     val (tmpSeps, tmpAlpha) = {
       // len_separators: 8
@@ -76,7 +46,7 @@ class Hashids(
     }
 
     val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
-    val shuffledAlpha = reorder(tmpAlpha, salt)
+    val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
 
     if (shuffledAlpha.length < 3) {
       val guards = tmpSeps.substring(0, guardCount)
@@ -109,7 +79,7 @@ class Hashids(
 
   def decodeHex(hash: String): String = impl.decodeHex(hash)
 
-  def consistenShuffle(alphabet: String, salt: String): String = {
+  def consistentShuffle(alphabet: String, salt: String): String = {
     @tailrec
     def doShuffle(i: Int, v: Int, p: Int, result: String): String = {
       if (i <= 0) {
