@@ -139,11 +139,7 @@ class Hashids(
       if (encode(res:_*) == hash) res else Nil
   }
 
-  def decodeHex(hash: String): String = {
-    decode(hash).map { x =>
-      x.toHexString.substring(1).toUpperCase
-    }.mkString
-  }
+  def decodeHex(hash: String): String = decode(hash).map(_.toHexString.substring(1).toUpperCase).mkString
 
   def version = "1.0.0"
 }
