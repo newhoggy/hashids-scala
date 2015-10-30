@@ -7,21 +7,60 @@ class Hashids(
     salt: String = "",
     minHashLength: Int = 0,
     alphabet: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") {
-  private val distinctAlphabet = alphabet.distinct
+  private def reorder(string: String, salt: String): String = {
+    val len_salt = salt.length
 
-  require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
-  require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+    if (len_salt == 0) {
+      string
+    } else {
+      var i = string.length - 1
+      var index = 0
+      var integer_sum = 0
+      var temp_string = string
 
-  private val sepDiv = 3.5
-  private val guardDiv = 12
+      while (i > 0) {
+        index %= len_salt
+        val integer = salt(index).toInt
+        integer_sum += integer
+        val j = (integer + index + integer_sum) % i
+
+        val temp = temp_string(j)
+        val trailer = if (j + 1 < temp_string.length) temp_string.substring(j + 1) else ' '
+        temp_string = temp_string.substring(0, j) + temp_string(i) + trailer
+        temp_string = temp_string.substring(0, i) + temp + temp_string.substring(i + 1)
+
+        i -= 1
+        index += 1
+      }
+
+      temp_string
+    }
+  }
 
   val impl = {
+    val distinctAlphabet = alphabet.distinct
+
+    require(distinctAlphabet.length >= 16, "alphabet must contain at least 16 unique characters")
+    require(distinctAlphabet.indexOf(" ") < 0, "alphabet cannot contains spaces")
+
+    val sepDiv = 3.5
+    val guardDiv = 12
+
     val filteredSeps = "cfhistuCFHISTU".filter(x => distinctAlphabet.contains(x))
     val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
-    val shuffledSeps = consistentShuffle(filteredSeps, salt)
+    val shuffledSeps = reorder(filteredSeps, salt)
+
+    println(s"filteredSeps: $filteredSeps")
+    println(s"filteredAlphabet: $filteredAlphabet")
+    println(s"shuffledSeps: $shuffledSeps")
 
     val (tmpSeps, tmpAlpha) = {
-      if (shuffledSeps.isEmpty || ((filteredAlphabet.length / shuffledSeps.length) > sepDiv)) {
+      // len_separators: 8
+      // Assigning min_separators: 8
+
+      // int(ceil(float(dividend) / divisor))
+
+      if (shuffledSeps.isEmpty || (sepDiv < Math.ceil(filteredAlphabet.length.toFloat / shuffledSeps.length.toFloat))) {
         val sepsTmpLen = Math.ceil(filteredAlphabet.length / sepDiv).toInt
         val sepsLen = if (sepsTmpLen == 1) 2 else sepsTmpLen
 
@@ -29,22 +68,36 @@ class Hashids(
           val diff = sepsLen - shuffledSeps.length
           val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
           val alpha = filteredAlphabet.substring(diff)
+          println("alphabet mod 1")
           (seps, alpha)
         } else {
           val seps = shuffledSeps.substring(0, sepsLen)
           val alpha = filteredAlphabet
+          println("alphabet mod 2")
           (seps, alpha)
         }
-      } else (shuffledSeps, filteredAlphabet)
+      } else {
+        println("alphabet mod 3")
+        (shuffledSeps, filteredAlphabet)
+      }
     }
 
+    println(s"tmpSeps: $tmpSeps")
+    println(s"tmpAlpha: $tmpAlpha")
+
     val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
-    val shuffledAlpha = consistentShuffle(tmpAlpha, salt)
+    val shuffledAlpha = reorder(tmpAlpha, salt)
+
+    println(s"guardCount: $guardCount")
+    println(s"shuffledAlpha: $shuffledAlpha")
 
     if (shuffledAlpha.length < 3) {
       val guards = tmpSeps.substring(0, guardCount)
       val seps = tmpSeps.substring(guardCount)
-      
+
+      println(s"guards 1: $guards")
+      println(s"seps 1: $seps")
+
       HashidsImpl(
         salt = salt,
         minHashLength = minHashLength,
@@ -54,6 +107,9 @@ class Hashids(
     } else {
       val guards = shuffledAlpha.substring(0, guardCount)
       val alpha = shuffledAlpha.substring(guardCount)
+
+      println(s"guards 2: $guards")
+      println(s"seps 2: $alpha")
 
       HashidsImpl(
         salt = salt,
@@ -72,7 +128,7 @@ class Hashids(
 
   def decodeHex(hash: String): String = impl.decodeHex(hash)
 
-  def consistentShuffle(alphabet: String, salt: String): String = {
+  def consistenShuffle(alphabet: String, salt: String): String = {
     @tailrec
     def doShuffle(i: Int, v: Int, p: Int, result: String): String = {
       if (i <= 0) {
