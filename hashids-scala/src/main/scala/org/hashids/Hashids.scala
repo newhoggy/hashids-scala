@@ -51,7 +51,13 @@ class Hashids(
     }
   }
 
-  def encode(numbers: Long*): String = if (numbers.isEmpty) "" else _encode(numbers:_*)
+  def encode(numbers: Long*): String = {
+    if (numbers.isEmpty) {
+      ""
+    } else {
+      org.hashids.impl.encode(numbers:_*)(effectiveAlphabet, minHashLength, salt, seps, guards)
+    }
+  }
 
   def encodeHex(in: String): String = {
     require(in.matches("^[0-9a-fA-F]+$"), "Not a HEX string")
@@ -66,76 +72,13 @@ class Hashids(
         result
     }
 
-    _encode(doSplit(Nil):_*)
-  }
-
-  private def _encode(numbers: Long*): String = {
-    val indexedNumbers = numbers.zipWithIndex
-    val numberHash = indexedNumbers
-      .foldLeft[Int](0){ case (acc, (x, i)) =>
-        acc + (x % (i+100)).toInt
-    }
-    val lottery = effectiveAlphabet.charAt(numberHash % effectiveAlphabet.length).toString
-
-    val (tmpResult, tmpAlpha) =
-      indexedNumbers.foldLeft[(String, String)]((lottery, effectiveAlphabet)) {
-        case ((result, alpha), (x, i)) =>
-          val buffer = lottery + salt + alpha
-          val newAlpha = consistentShuffle(alpha, buffer.substring(0, alpha.length))
-          val last = hash(x, newAlpha)
-          val newResult = result + last
-
-          if (i + 1 < numbers.size) {
-            val num = x % (last.codePointAt(0) + i)
-            val sepsIndex = (num % seps.length).toInt
-            (newResult + seps.charAt((num % seps.length).toInt), newAlpha)
-          } else {
-            (newResult, newAlpha)
-          }
-      }
-
-    val provisionalResult = {
-      if (tmpResult.length < minHashLength) {
-        val guardIndex = (numberHash + tmpResult.codePointAt(0)) % guards.length
-        val guard = guards.charAt(guardIndex)
-
-        val provResult = guard + tmpResult
-
-        if (provResult.length < minHashLength) {
-          val guardIndex = (numberHash + provResult.codePointAt(2)) % guards.length
-          val guard = guards.charAt(guardIndex)
-          provResult + guard
-        } else {
-          provResult
-        }
-      } else tmpResult
-    }
-
-    val halfLen = tmpAlpha.length / 2
-
-    @tailrec
-    def respectMinHashLength(alpha: String, res: String): String = {
-      if (res.length >= minHashLength) {
-        res
-      } else {
-        val newAlpha = consistentShuffle(alpha, alpha);
-        val tmpRes = newAlpha.substring(halfLen) + res + newAlpha.substring(0, halfLen);
-        val excess = tmpRes.length - minHashLength
-        val newRes = if(excess > 0) {
-          val startPos = excess / 2
-          tmpRes.substring(startPos, startPos + minHashLength)
-        } else tmpRes
-        respectMinHashLength(newAlpha, newRes)
-      }
-    }
-
-    respectMinHashLength(tmpAlpha, provisionalResult)
+    org.hashids.impl.encode(doSplit(Nil):_*)(effectiveAlphabet, minHashLength, salt, seps, guards)
   }
 
   def decode(hash: String): List[Long] = hash match {
     case "" => Nil
     case x =>
-      val res = org.hashids.impl.decode(x, effectiveAlphabet, salt, seps, guards)
+      val res = org.hashids.impl.decode(x)(effectiveAlphabet, salt, seps, guards)
       if (encode(res:_*) == hash) res else Nil
   }
 
