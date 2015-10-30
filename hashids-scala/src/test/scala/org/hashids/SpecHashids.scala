@@ -136,8 +136,6 @@ class SpecHashids extends Specification {
     "for salt = 'MyCamelCaseSalt', max length = 10, alphabet = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'" >> {
       val hashids = Hashids("MyCamelCaseSalt", 10, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789")
 
-      println(hashids.impl)
-
       hashids.impl ==== HashidsImpl(salt = "MyCamelCaseSalt",
         minHashLength = 10,
         effectiveAlphabet = "97ZP3LE8W5QKD4XRY21BVNJ",

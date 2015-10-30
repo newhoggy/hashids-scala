@@ -50,10 +50,6 @@ class Hashids(
     val filteredAlphabet = distinctAlphabet.filterNot(x => filteredSeps.contains(x))
     val shuffledSeps = reorder(filteredSeps, salt)
 
-    println(s"filteredSeps: $filteredSeps")
-    println(s"filteredAlphabet: $filteredAlphabet")
-    println(s"shuffledSeps: $shuffledSeps")
-
     val (tmpSeps, tmpAlpha) = {
       // len_separators: 8
       // Assigning min_separators: 8
@@ -68,35 +64,23 @@ class Hashids(
           val diff = sepsLen - shuffledSeps.length
           val seps = shuffledSeps + filteredAlphabet.substring(0, diff)
           val alpha = filteredAlphabet.substring(diff)
-          println("alphabet mod 1")
           (seps, alpha)
         } else {
           val seps = shuffledSeps.substring(0, sepsLen)
           val alpha = filteredAlphabet
-          println("alphabet mod 2")
           (seps, alpha)
         }
       } else {
-        println("alphabet mod 3")
         (shuffledSeps, filteredAlphabet)
       }
     }
 
-    println(s"tmpSeps: $tmpSeps")
-    println(s"tmpAlpha: $tmpAlpha")
-
     val guardCount = Math.ceil(tmpAlpha.length.toDouble / guardDiv).toInt
     val shuffledAlpha = reorder(tmpAlpha, salt)
-
-    println(s"guardCount: $guardCount")
-    println(s"shuffledAlpha: $shuffledAlpha")
 
     if (shuffledAlpha.length < 3) {
       val guards = tmpSeps.substring(0, guardCount)
       val seps = tmpSeps.substring(guardCount)
-
-      println(s"guards 1: $guards")
-      println(s"seps 1: $seps")
 
       HashidsImpl(
         salt = salt,
@@ -107,9 +91,6 @@ class Hashids(
     } else {
       val guards = shuffledAlpha.substring(0, guardCount)
       val alpha = shuffledAlpha.substring(guardCount)
-
-      println(s"guards 2: $guards")
-      println(s"seps 2: $alpha")
 
       HashidsImpl(
         salt = salt,
