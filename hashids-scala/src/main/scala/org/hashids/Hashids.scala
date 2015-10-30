@@ -135,7 +135,7 @@ class Hashids(
   def decode(hash: String): List[Long] = hash match {
     case "" => Nil
     case x =>
-      val res = _decode(x, effectiveAlphabet)
+      val res = org.hashids.impl.decode(x, effectiveAlphabet, salt, seps, guards)
       if (encode(res:_*) == hash) res else Nil
   }
 
@@ -143,25 +143,6 @@ class Hashids(
     decode(hash).map { x =>
       x.toHexString.substring(1).toUpperCase
     }.mkString
-  }
-
-  private def _decode(hash: String, alphabet: String): List[Long] = {
-    val hashArray = hash.split(s"[$guards]")
-    val i = if (hashArray.length == 3 || hashArray.length == 2) 1 else 0
-    val lottery = hashArray(i).charAt(0)
-    val hashBreakdown = hashArray(i).substring(1).split(s"[$seps]")
-
-    @tailrec
-    def doDecode(
-        in: List[String], buff: String,
-        alpha: String, result: List[Long]): List[Long] = in match {
-      case Nil => result.reverse
-      case x :: tail =>
-        val newAlpha = consistentShuffle(alpha, buff.substring(0, alpha.length))
-        doDecode(tail, lottery + this.salt + newAlpha, newAlpha, unhash(x, newAlpha) :: result)
-    }
-
-    doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
   }
 
   def version = "1.0.0"
