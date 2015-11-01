@@ -4,6 +4,7 @@ dependencies:
 
   pre:
     - scripts/check-env-variables.sh
+    - scripts/get-credentials.sh
 
   post:
     - find ~/.sbt -name "*.lock" | xargs rm
