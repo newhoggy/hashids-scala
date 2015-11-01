@@ -8,3 +8,9 @@ dependencies:
   post:
     - find ~/.sbt -name "*.lock" | xargs rm
     - find ~/.ivy2 -name "ivydata-*.properties" | xargs rm
+
+deployment:
+  master:
+    branch: master
+    commands:
+      - sbt +publish
