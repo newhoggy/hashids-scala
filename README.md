@@ -1,4 +1,4 @@
-# Hashids.scala ![Build Status](https://travis-ci.org/newhoggy/pico-kind.svg?branch=master)
+# Hashids.scala [![Circle CI](https://circleci.com/gh/newhoggy/hashids-scala.svg?style=svg)](https://circleci.com/gh/newhoggy/hashids-scala)
 
 A small Scala library to generate YouTube-like hashes from one or many numbers.
 
