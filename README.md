@@ -30,7 +30,7 @@ If you're using SBT, add the following lines to your build file:
 
     resolvers += "dl-john-ky" at "http://dl.john-ky.io/maven/releases"
 
-    libraryDependencies += "io.john-ky" %% "hashids-scala" % "1.1.1-7d841a8"
+    libraryDependencies += "io.john-ky" %% "hashids-scala" % "1.1.2-2974446"
 
 ## Compatibility note
 
