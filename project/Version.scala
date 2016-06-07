@@ -14,7 +14,7 @@ trait Version {
     val remote = settingKey[String]("")
   }
 
-  lazy val releaseVersion = List("1.1.1")
+  lazy val releaseVersion = List("1.1.2")
 
   lazy val gitSha = Process("git rev-parse --short HEAD").lines.take(1).toList
 
