@@ -38,7 +38,14 @@ class Hashids(
     case "" => Nil
     case x =>
       val res = org.hashids.impl.decode(x)(effectiveAlphabet, salt, seps, guards)
-      if (encode(res:_*) == hash) res else Nil
+
+      if (res.exists(_ < 0)) {
+        List.empty
+      } else if (encode(res: _*) == hash) {
+        res
+      } else {
+        Nil
+      }
   }
 
   def decodeHex(hash: String): String = decode(hash).map(_.toHexString.substring(1).toUpperCase).mkString

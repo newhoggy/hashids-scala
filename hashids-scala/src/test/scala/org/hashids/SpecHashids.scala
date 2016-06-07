@@ -1,9 +1,11 @@
 package org.hashids
 
 import org.hashids.syntax._
+import org.scalacheck.Gen
+import org.specs2.ScalaCheck
 import org.specs2.mutable._
 
-class SpecHashids extends Specification {
+class SpecHashids extends Specification with ScalaCheck {
   "One number should encode then decode" >> {
     implicit val hashids = Hashids.reference("this is my salt")
     val expected = "NkK9"
@@ -142,5 +144,13 @@ class SpecHashids extends Specification {
       encoded ==== "9Q7MJ3LVGW"
       decoded ==== List(raw)
     }
+  }
+
+  "Invalid hash should not cause out of bounds exception" >> {
+    prop { (hash: String) =>
+      val hashids = Hashids.reference("This is my salt")
+      hashids.decodeHex(hash)
+      ok
+    }.setGen(Gen.alphaStr)
   }
 }

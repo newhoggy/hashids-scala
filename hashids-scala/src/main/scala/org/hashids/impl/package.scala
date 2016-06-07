@@ -114,19 +114,28 @@ package object impl {
   def decode(hash: String)(effectiveAlphabet: String, salt: String, seps: String, guards: String): List[Long] = {
     val hashArray = hash.split(s"[$guards]")
     val i = if (hashArray.length == 3 || hashArray.length == 2) 1 else 0
-    val lottery = hashArray(i).charAt(0)
-    val hashBreakdown = hashArray(i).substring(1).split(s"[$seps]")
+    if (hashArray.nonEmpty) {
+      val hashArrayI = hashArray(i)
+      if (hashArrayI.nonEmpty) {
+        val lottery = hashArray(i).charAt(0)
+        val hashBreakdown = hashArray(i).substring(1).split(s"[$seps]")
 
-    @tailrec
-    def doDecode(
-                  in: List[String], buff: String,
-                  alpha: String, result: List[Long]): List[Long] = in match {
-      case Nil => result.reverse
-      case x :: tail =>
-        val newAlpha = consistentShuffle(alpha, buff.substring(0, alpha.length))
-        doDecode(tail, lottery + salt + newAlpha, newAlpha, unhash(x, newAlpha) :: result)
+        @tailrec
+        def doDecode(
+            in: List[String], buff: String,
+            alpha: String, result: List[Long]): List[Long] = in match {
+          case Nil => result.reverse
+          case x :: tail =>
+            val newAlpha = consistentShuffle(alpha, buff.substring(0, alpha.length))
+            doDecode(tail, lottery + salt + newAlpha, newAlpha, unhash(x, newAlpha) :: result)
+        }
+
+        doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
+      } else {
+        List.empty
+      }
+    } else {
+      List.empty
     }
-
-    doDecode(hashBreakdown.toList, lottery + salt + effectiveAlphabet, effectiveAlphabet, Nil)
   }
 }
