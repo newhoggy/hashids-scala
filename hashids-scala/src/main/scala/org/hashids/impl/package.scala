@@ -43,8 +43,8 @@ package object impl {
   }
 
   def unhash(input: String, alphabet: String): Long = {
-    input.zipWithIndex.foldLeft[Long](0L) { case (acc, (in, i)) =>
-      acc + (alphabet.indexOf(in) * Math.pow(alphabet.length, input.length - 1 - i)).toLong
+    input.foldLeft[Long](0L) {
+      (carry, item) => carry * alphabet.length + alphabet.indexOf(item)
     }
   }
 
