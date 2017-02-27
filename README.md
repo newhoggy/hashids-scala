@@ -4,6 +4,10 @@ A small Scala library to generate YouTube-like hashes from one or many numbers.
 
 Ported from Java [hashids-java](https://github.com/jiecao-fm/hashids-java) by [John Ky](https://github.com/newhoggy)
 
+**NOTE** This project is moving to https://github.com/pico-works/pico-hashids
+
+For the latest version, please go there instead.
+
 ## What is it?
 
 hashids (Hash ID's) creates short, unique, decryptable hashes from unsigned (long) integers.

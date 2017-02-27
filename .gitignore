@@ -21,3 +21,5 @@ target
 *.asc
 
 /sbt-launch
+
+.DS_Store
